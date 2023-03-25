@@ -11,7 +11,7 @@ from scipy.cluster.hierarchy import fcluster
 from colors import colors, colors_agp
 from helpers import get_df_of_date, get_infos_from_group
 from preprocessing import date_max, logs_sgv_plot, logs_carbs, logs_insulin
-from variables import target_range, font
+from variables import target_range, font, target_range_extended, target_range_dict
 
 alpha_max_insulin = logs_insulin['bolus'].to_numpy().max()
 
@@ -22,8 +22,6 @@ end_date = date_max
 
 y_range = [-400, 450]
 
-
-# fig_timeline = make_subplots(rows=4, cols=1, shared_xaxes=True, row_heights=[0.4, 0.2, 0.2, 0.2], vertical_spacing=0.05, subplot_titles=('<b>Glucose</b> mg/dL', '<b>Carbs</b> g', '<b>Bolus</b> U', '<b>Basal</b> U/h'))
 
 def get_daily_data(day):
     sgv_today = get_df_of_date(logs_sgv_plot, day)
@@ -45,23 +43,13 @@ def get_non_periodic_data(indices, idx):
     return sgv_today, carbs_today, insulin_today
 
 
-def draw_horizon_graph(sgv_today, carbs_today, insulin_today, x_range, box_data=None, highlight_data=None):
+def draw_horizon_graph(sgv_today, carbs_today, insulin_today, x_range):
     fig = make_subplots(rows=3, cols=1, shared_xaxes=True, row_heights=[0.6, 0.2, 0.2], vertical_spacing=0.05)
 
-    def transform_bg_scale(sgv):
-        return 1.509 * (np.log(sgv) ** 1.084 - 5.381)
-
-    sgv_today['transform'] = sgv_today['sgv'].apply(transform_bg_scale)
-
-    thresholds = {'very low': -1.36,
-                # 'very low': transform_bg_scale(54),
-                  # 'low': transform_bg_scale(70),
-                  'low': -0.88,
-                  # 'high': transform_bg_scale(180),
-                  'high': 0.88,
-                  # 'very high': transform_bg_scale(250),
-                  'very high': 1.36,
-                  }
+    sgv_today['vl'] = sgv_today['sgv'] <= target_range_dict['very low']
+    sgv_today['l'] = sgv_today['sgv'].between(target_range_dict['very low'], target_range_dict['low'])
+    sgv_today['h'] = sgv_today['sgv'].between(target_range_dict['high'], target_range_dict['very high'])
+    sgv_today['vh'] = sgv_today['sgv'] >= target_range_dict['very high']
 
     # in range
     fig.add_trace(
@@ -78,16 +66,15 @@ def draw_horizon_graph(sgv_today, carbs_today, insulin_today, x_range, box_data=
         row=1, col=1
     )
 
+    # high
     sgv_high = sgv_today.loc[sgv_today['high']]
     if len(sgv_high) > 1:
-        # sgv_today['transform'] = sgv_today['sgv'].apply(transform_bg_scale)
-        sgv_today['transform_high'] = sgv_today['transform']
-        sgv_today['transform_high'][sgv_today['transform_high'] >= thresholds['very high']] = thresholds['very high']
-        sgv_today['transform_high'][sgv_today['transform_high'] <= thresholds['high']] = thresholds['high']
-        sgv_today['transform_high'] = sgv_today['transform_high'] - thresholds['high']
-        sgv_today['transform_high'] = sgv_today['transform_high'] + 0.2
-        sgv_today['transform_high'][sgv_today['transform'] <= thresholds['high']] = 0
-        # above range
+        sgv_today['transform_high'] = sgv_today['sgv'].copy()
+        sgv_today['transform_high'][sgv_today['vh']] = target_range_dict['very high']
+        sgv_today['transform_high'][sgv_today['transform_high'] <= target_range_dict['high']] = target_range_dict['high']
+        sgv_today['transform_high'] = sgv_today['transform_high'] - target_range_dict['high']
+        sgv_today['transform_high'][sgv_today['sgv'] <= target_range_dict['high']] = 0
+        sgv_today['transform_high'] = sgv_today['transform_high'] / (target_range_dict['very high'] - target_range_dict['high'])
 
         fig.add_trace(
             go.Scatter(
@@ -103,18 +90,16 @@ def draw_horizon_graph(sgv_today, carbs_today, insulin_today, x_range, box_data=
             row=1, col=1
         )
 
+    # low
     sgv_low = sgv_today.loc[sgv_today['low']]
     if len(sgv_low) > 1:
-        # sgv_today['transform'] = sgv_today['sgv'].apply(transform_bg_scale)
-        sgv_today['transform_low'] = sgv_today['transform']
-        sgv_today['transform_low'][sgv_today['transform_low'] <= thresholds['very low']] = thresholds['very low']
-        sgv_today['transform_low'][sgv_today['transform_low'] >= thresholds['low']] = thresholds['low']
-        sgv_today['transform_low'] = sgv_today['transform_low'] - thresholds['low']
+        sgv_today['transform_low'] = sgv_today['sgv'].copy()
+        sgv_today['transform_low'][sgv_today['transform_low'] <= target_range_dict['very low']] = target_range_dict['very low']
+        sgv_today['transform_low'][sgv_today['transform_low'] >= target_range_dict['low']] = target_range_dict['low']
+        sgv_today['transform_low'] = sgv_today['transform_low'] - target_range_dict['low']
         sgv_today['transform_low'] = sgv_today['transform_low'] * (-1)
-        sgv_today['transform_low'] = sgv_today['transform_low'] + 0.2
-        sgv_today['transform_low'][sgv_today['transform'] >= thresholds['low']] = 0
-
-        # below range
+        sgv_today['transform_low'][sgv_today['sgv'] >= target_range_dict['low']] = 0
+        sgv_today['transform_low'] = sgv_today['transform_low'] / (target_range_dict['low'] - target_range_dict['very low'])
 
         fig.add_trace(
             go.Scatter(
@@ -130,12 +115,12 @@ def draw_horizon_graph(sgv_today, carbs_today, insulin_today, x_range, box_data=
             row=1, col=1
         )
 
-    if (sgv_today['transform'] > 1.36).any():
-        sgv_today['transform_very_high'] = sgv_today['transform']
-        sgv_today['transform_very_high'][sgv_today['transform_very_high'] <= thresholds['very high']] = thresholds['very high']
-        sgv_today['transform_very_high'] = sgv_today['transform_very_high'] - thresholds['very high']
-
-        # above range
+    # very high
+    if (sgv_today['sgv'] > target_range_dict['very high']).any():
+        sgv_today['transform_very_high'] = sgv_today['sgv'].copy()
+        sgv_today['transform_very_high'][sgv_today['transform_very_high'] <= target_range_dict['very high']] = target_range_dict['very high']
+        sgv_today['transform_very_high'] = sgv_today['transform_very_high'] - target_range_dict['very high']
+        sgv_today['transform_very_high'] = sgv_today['transform_very_high'] / (350 - target_range_dict['very high'])
 
         fig.add_trace(
             go.Scatter(
@@ -151,13 +136,13 @@ def draw_horizon_graph(sgv_today, carbs_today, insulin_today, x_range, box_data=
             row=1, col=1
         )
 
-    if (sgv_today['transform'] < -1.36).any():
-        sgv_today['transform_very_low'] = sgv_today['transform']
-        sgv_today['transform_very_low'][sgv_today['transform_very_low'] >= thresholds['very low']] = thresholds['very low']
-        sgv_today['transform_very_low'] = sgv_today['transform_very_low'] - thresholds['very low']
+    # very low
+    if (sgv_today['sgv'] < target_range_dict['very low']).any():
+        sgv_today['transform_very_low'] = sgv_today['sgv'].copy()
+        sgv_today['transform_very_low'][sgv_today['transform_very_low'] >= target_range_dict['very low']] = target_range_dict['very low']
+        sgv_today['transform_very_low'] = sgv_today['transform_very_low'] - target_range_dict['very low']
         sgv_today['transform_very_low'] = sgv_today['transform_very_low'] * (-1)
-
-        # above range
+        sgv_today['transform_very_low'] = sgv_today['transform_very_low'] / (target_range_dict['very low'] - 40)
 
         fig.add_trace(
             go.Scatter(
@@ -173,6 +158,7 @@ def draw_horizon_graph(sgv_today, carbs_today, insulin_today, x_range, box_data=
             row=1, col=1
         )
 
+    # treatments
     if not carbs_today.empty:
         fig = plot_treatments(fig, 2, carbs_today, 'carbs', 'g', 100)
     if not insulin_today.empty:
@@ -181,14 +167,11 @@ def draw_horizon_graph(sgv_today, carbs_today, insulin_today, x_range, box_data=
     x_values, x_labels = get_infos_from_group('day')
     fig.update_xaxes(type="date", range=x_range, automargin=False, visible=True, showgrid=True, tickvals=x_values, ticktext=['' for _ in x_labels])
     fig.update_layout(xaxis_rangeslider_visible=False,
-                      # xaxis2_rangeslider_visible=False,
-                      # xaxis_type="date",
                       showlegend=False,
                       width=575, height=60,
                       margin=dict(t=0, b=20, l=0, r=0),
                       plot_bgcolor=colors['background'],
                       yaxis=dict(
-                          # showticklabels=False,
                           range=[0, 0.48 + 0.2],
                           tickfont_size=8,
                           visible=False
@@ -196,28 +179,20 @@ def draw_horizon_graph(sgv_today, carbs_today, insulin_today, x_range, box_data=
                       yaxis2=dict(
                           range=[0, 1],
                           tickfont_size=8,
-                          # overlaying="y",
                           showgrid=False,
                           visible=False
                       ),
                       yaxis3=dict(
                           range=[0, 1],
                           tickfont_size=8,
-                          # overlaying="y",
                           showgrid=False,
                           visible=False
                       ),
                       font=dict(
                           family=font,
-                          # size=8,
-                          # color="RebeccaPurple"
                       ),
                       paper_bgcolor='rgba(0,0,0,0)',
                       )
-
-    if box_data:  # if agp
-        fig.update_xaxes(fixedrange=True, visible=True, showgrid=True, ticktext=['' for _ in x_labels], tickvals=x_values)
-        fig.update_layout(dragmode="select", clickmode='event+select', selectdirection='h', margin=dict(t=0, b=0, l=0, r=0))
 
     return fig
 

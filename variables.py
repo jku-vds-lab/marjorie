@@ -1,5 +1,11 @@
 target_range = [70, 180]
 target_range_extended = [54, 70, 180, 250]
+target_range_dict = {
+    'very low': 54,
+    'low': 70,
+    'high': 180,
+    'very high': 250
+}
 num_motifs = 20
 num_segments = 12
 window_size = 2
