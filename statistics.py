@@ -1,12 +1,7 @@
-from datetime import timedelta
-
-import numpy as np
-import pandas as pd
 import plotly.graph_objects as go
 
 from colors import colors
 from helpers import get_tir, get_df_of_date, get_statistics, get_df_between_dates, get_mean_per_day
-from variables import target_range_extended, target_range
 from preprocessing import logs_sgv, logs_carbs, logs_insulin, logs_br_default
 
 

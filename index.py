@@ -8,7 +8,7 @@ from daily import draw_daily_plot
 from layout import app, layout_daily, layout_agp, layout_overview
 from dash_extensions.enrich import Output, DashProxy, Input, MultiplexerTransform, State, callback_context, ALL
 
-from pattern_detail import draw_pattern_detail_plot, get_daily_data, get_x_range_for_day, draw_pattern_detail_plot_curve
+from overview import draw_horizon_graph, get_daily_data, get_x_range_for_day, draw_overview_daily_curve_detailed
 from statistics import get_tir_plot, get_statistics_day, get_statistics_days
 from helpers import convert_datestring, get_df_between_dates, get_tir, get_statistics, check_timebox, get_log_indices, calculate_tir_time, get_df_of_date, get_mean_per_day
 from preprocessing import dates, logs_sgv, date_max, date_min, start_date, end_date, sgv_array_for_agp, date_dict, logs_carbs, logs_insulin, logs_br_default, start_date_insights
@@ -292,10 +292,10 @@ def expand_button_click(*args):
 
         # if (value % 2) == 0:
         if figures[clicked]['layout']['height'] > 100:
-            figure = draw_pattern_detail_plot(*get_daily_data(day), x_range=get_x_range_for_day(day))
+            figure = draw_horizon_graph(*get_daily_data(day), x_range=get_x_range_for_day(day))
             button = html.Span([html.I(className="fas fa-caret-down fa-2x")])
         else:
-            figure = draw_pattern_detail_plot_curve(*get_daily_data(day), x_range=get_x_range_for_day(day))
+            figure = draw_overview_daily_curve_detailed(*get_daily_data(day), x_range=get_x_range_for_day(day))
             button = html.Span([html.I(className="fas fa-caret-up fa-2x")])
 
         figures = [dash.no_update] * clicked + [figure] + [dash.no_update] * (num_horizon_graphs - clicked - 1)
@@ -361,7 +361,7 @@ def overview_update_dates(date_start, date_end):
            *[days_horizon_graphs[i].strftime('%d/%m/%Y') for i in range(len(days_horizon_graphs))] + [''] * (num_horizon_graphs - len(days_horizon_graphs)), \
            *[{'display': 'inline'}] * min(num_horizon_graphs, len(days_horizon_graphs)) + [{'display': 'none'}] * (num_horizon_graphs - len(days_horizon_graphs)), \
            *[days_horizon_graphs[i].strftime('%a, %d/%m') for i in range(len(days_horizon_graphs))] + [''] * (num_horizon_graphs - len(days_horizon_graphs)), \
-           *[draw_pattern_detail_plot(*get_daily_data(day), x_range=get_x_range_for_day(day)) for day in days_horizon_graphs] + [dash.no_update] * (num_horizon_graphs - len(days_horizon_graphs))
+           *[draw_horizon_graph(*get_daily_data(day), x_range=get_x_range_for_day(day)) for day in days_horizon_graphs] + [dash.no_update] * (num_horizon_graphs - len(days_horizon_graphs))
 
 
 @app.callback(

@@ -1,16 +1,13 @@
-from pytz import timezone
 from dateutil.relativedelta import relativedelta
-from datetime import datetime, timedelta, date
-from dateutil import parser
-from dateutil.tz import gettz
 import datetime as dt
-import pandas as pd
+from datetime import timedelta, date
+
 import numpy as np
+import pandas as pd
+from dateutil import parser
+from dateutil.relativedelta import relativedelta
 
-from colors import colors
 from variables import target_range, target_range_extended
-
-tz = 'US/Pacific'  # TODO
 
 
 def convert_datestring(datestring):
@@ -31,27 +28,6 @@ def convert_datestrings_df(df, data_names):
             print(datestring)
         else:
             continue
-
-        # if ('Z' in time):
-        #     d = dt.datetime.strptime(time, "%Y-%m-%dT%H:%M:%S.%fZ")
-        #     d = d.replace(tzinfo=timezone('UTC')).astimezone(timezone(tz)).replace(tzinfo=None)
-        #     datet.append(d)
-        #     data.append(entry)
-        # elif ('T' in time):
-        #     d = dt.datetime.strptime(time, "%Y-%m-%dT%H:%M:%S.%f%z")
-        #     d = d.replace(tzinfo=timezone('UTC')).astimezone(timezone(tz)).replace(tzinfo=None)
-        #     datet.append(d)
-        #     data.append(entry)
-        # elif ('.' in time) and (':' in time):
-        #     d = dt.datetime.strptime(time, "%Y-%m-%dT%H:%M:%S.%f%z").astimezone(timezone(tz)).replace(tzinfo=None)
-        #     datet.append(d)
-        #     data.append(entry)
-        # # elif ('T' not in time) and (len(time)<13):
-        # else:
-        #     # d = dt.datetime.strptime(time, "%Y-%m-%dT%H:%M:%S%z").astimezone(timezone(tz)).replace(tzinfo=None)
-        #     # datet.append(d)
-        #     # data.append(entry)
-        #     continue
     return pd.DataFrame(data)
 
 
@@ -119,9 +95,7 @@ def get_infos_from_group(group):
 
     labels = {
         'day': ['0 am', '6 am', '12 am', '6 pm', '0 pm'],
-        # 'week': ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
         'week': ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-        # 'month': ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
         'month': ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
         'quarter': ['Q1', 'Q2', 'Q3', 'Q4']
     }
@@ -130,7 +104,6 @@ def get_infos_from_group(group):
 
 def construct_colorscale(colors, domain=None):
     if not domain:
-        # colors = colors[1:]
         domain = np.linspace(10 ** (-5), 1, num=len(colors) + 1)
     domain = np.insert(domain, 0, 0)
     colors = ['rgba(248,249,250,1)'] + colors
@@ -264,9 +237,6 @@ def get_statistics(sgv):
         'time_very_high': time_very_high(sgv)
 
     }
-    # time_very_low, time_low, time_in_range, time_high, time_very_high = get_tir(sgv)
-    # sgv_mean = get_sgv_mean(sgv)
-    # sgv_std = get_sgv_std(sgv)
 
 
 def datestr(date_dt):
@@ -298,7 +268,6 @@ def get_mean_per_day(logs, log_type):
 def check_timebox(array, y_range):
     array = np.ma.array(array, mask=np.isnan(array))
     in_selected_range = (array > y_range[0]) & (array < y_range[1])
-    # result = np.where(np.all(in_selected_range, axis=1))[0]
     result = np.where((np.sum(in_selected_range, axis=1) / array.count(axis=1)) >= 0.4)[0]
     return result
 

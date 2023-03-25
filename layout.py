@@ -10,8 +10,7 @@ from daily import draw_daily_plot
 import numpy as np
 from insights import draw_pattern_overview, add_time_before_after, get_insight_dataset, get_insight_clusters, draw_hierarchical_pattern_overview, get_logs_meals, get_logs_from_indices, get_insight_data_meals, \
     get_time_of_day_from_number, get_curve_overview_plot, get_dataset, filter_function_time_of_day, filter_function_meal_size, get_insight_data_hypos
-from motif_detection import get_fetures_sliding_windows, draw_clustering
-from pattern_detail import draw_pattern_detail_plot, get_daily_data, get_x_range_for_day, get_non_periodic_data, draw_pattern_detail_plot_curve
+from overview import draw_horizon_graph, get_daily_data, get_x_range_for_day, get_non_periodic_data, draw_overview_daily_curve_detailed
 from preprocessing import dates, logs_sgv, date_max, date_min, start_date, end_date, sgv_array_for_agp, date_dict, logs_carbs, logs_insulin, logs_br_default, start_date_insights
 from statistics import get_tir_plot, get_statistics_day, get_statistics_days
 from helpers import convert_datestring, get_df_between_dates, get_tir, get_statistics, check_timebox, get_log_indices, calculate_tir_time, get_mean_per_day, get_df_of_date
@@ -920,7 +919,7 @@ layout_overview = html.Div(
                                                              dcc.Graph(
                                                                  # figure=draw_pattern_detail_plot(date_max.date()),
                                                                  # figure={},
-                                                                 figure=draw_pattern_detail_plot(*get_daily_data(days_horizon_graphs[i]), x_range=get_x_range_for_day(days_horizon_graphs[i])),
+                                                                 figure=draw_horizon_graph(*get_daily_data(days_horizon_graphs[i]), x_range=get_x_range_for_day(days_horizon_graphs[i])),
                                                                  id='overview_horizon_graph_{}'.format(i),
                                                                  config={
                                                                      'displayModeBar': False

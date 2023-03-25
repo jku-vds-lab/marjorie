@@ -4,21 +4,19 @@ import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 import scipy
+import scipy.spatial.distance as ssd
+from dtaidistance import dtw
 from plotly.subplots import make_subplots
+from scipy.cluster.hierarchy import single, complete, average, ward, fcluster
 from scipy.signal import savgol_filter
-from tslearn.clustering import TimeSeriesKMeans
 from tslearn.utils import to_time_series_dataset
 
 from colors import colors, colors_agp, colors_patterns, colors_pattern_curves, colors_heatmap, domain_heatmap
 from helpers import get_df_between_dates, get_log_indices, construct_colorscale
-from pattern_detail import hierarchy_cluster
+from overview import hierarchy_cluster
 from preprocessing import logs_sgv, logs_carbs, logs_insulin, start_date_insights, end_date
-from variables import num_horizon_graphs, time_before_meal, time_after_meal, times_of_day, time_before_hypo, time_after_hypo
 from variables import target_range, font
-from sktime.distances.elastic_cython import dtw_distance
-from scipy.cluster.hierarchy import single, complete, average, ward, dendrogram, fcluster
-from dtaidistance import dtw
-import scipy.spatial.distance as ssd
+from variables import time_before_meal, time_after_meal, times_of_day, time_before_hypo, time_after_hypo
 
 
 def hierarchical_clustering(distance_matrix, method='average'):
@@ -40,38 +38,11 @@ def get_clusters_from_z(Z, max_d=200):
 
 
 def get_dtw_distance(data):
-    # Italy Power Demand time series are loaded in a pd.Series format.
-    # The dtw_distance function expects series to be shaped as a (l, m) array,
-    # where l=length of series, m=# dimensions
-
-    # series_list = data['dim_0'].values
-    # for i in range(len(series_list)):
-    #     length = len(series_list[i])
-    #     series_list[i] = series_list[i].values.reshape((length, 1))
-
-    # series_list = data
-    # # Initialize distance matrix
-    # n_series = len(series_list)
-    # distance_matrix = np.zeros(shape=(n_series, n_series))
-    #
-    # # Build distance matrix
-    # for i in range(n_series):
-    #     for j in range(n_series):
-    #         x = series_list[i]
-    #         y = series_list[j]
-    #
-    #         if i != j:
-    #             dist = dtw_distance(x, y)
-    #             distance_matrix[i, j] = dist
-    # distance_matrix = dtw.distance_matrix([np.array(item) for item in data])
     distance_matrix = dtw.distance_matrix_fast([np.array(item) for item in data])
     return distance_matrix
 
 
 def get_insight_clusters(dataset, max_d=200):
-    # km = TimeSeriesKMeans(n_clusters=n_clusters, verbose=True, metric='dtw')
-    # clusters = km.fit_predict(dataset)
-
     distance_matrix = get_dtw_distance(dataset)
     Z = hierarchical_clustering(distance_matrix)
     clusters = get_clusters_from_z(Z, max_d)
@@ -109,16 +80,7 @@ def get_average(array):
     med = np.nanmedian(array, axis=0)
     min = np.nanmin(array, axis=0)
     avg = med.copy()
-    # print('####### start ######')
-    # print(avg)
-    # avg = np.mean(np.array([med, min]), axis=0)
     avg[min < 80] = np.mean(np.array([med[min < 80], min[min < 80]]), axis=0)
-    # print(avg)
-    # print('###### end #######')
-    # if min < 70:
-    #     avg = np.mean(np.array([med, min]), axis=0)
-    # else:
-    #     avg = med.copy()
     return avg
 
 
@@ -128,14 +90,11 @@ def dropna(x):
 
 
 def draw_hierarchical_pattern_overview(dataset, dataset_array, dataset_carbs, dataset_bolus, text, time_before=0):
-    # layout = go.Layout(width=300, height=300, margin=dict(l=10, r=10, t=25, b=10))
-    # fig = go.Figure(layout=layout, layout_yaxis_range=[0, 350])
     fig = make_subplots(rows=4, cols=1, shared_xaxes=True, row_heights=[0.76, 0.12, 0.06, 0.06], vertical_spacing=0.025)
 
     for data_sgv, data_carbs, data_bolus in zip(dataset, dataset_carbs, dataset_bolus):
 
         x = np.linspace(time_before * (-1), len(data_sgv) * 5 / 60 - time_before, len(data_sgv))
-        # x = list(range(len(data)))
 
         fig.add_trace(
             go.Scatter(
@@ -145,7 +104,6 @@ def draw_hierarchical_pattern_overview(dataset, dataset_array, dataset_carbs, da
                 connectgaps=False,
                 showlegend=False,
                 line=dict(color=colors['highlight']),
-                # legendgroup='group_{}'.format(clusters[i]),
             ),
             row=1, col=1
         )
@@ -190,12 +148,8 @@ def draw_hierarchical_pattern_overview(dataset, dataset_array, dataset_carbs, da
 
     array = dataset_array.copy()
     array_min, array_max = get_min_max(array)
-    # print(array_min, array_max)
     array_min = dropna(array_min)
     array_max = dropna(array_max)
-    # array_min = savgol_filter(array_min, 11, 3) - 5
-    # array_max = savgol_filter(array_max, 11, 3) + 5
-    # x = list(range(0, len(array_min)*5, 5))
     x = np.linspace(time_before * (-1), len(array_min) * 5 / 60 - time_before, len(array_min))
 
     # low
@@ -285,11 +239,8 @@ def draw_hierarchical_pattern_overview(dataset, dataset_array, dataset_carbs, da
     # vertical line
     fig.add_vline(x=0, line_dash="dash")
 
-    # fig.update_xaxes(anchor='x4')
     fig.update_layout(
         plot_bgcolor=colors['background'],
-        # paper_bgcolor=colors['background'],
-        # margin={'pad': [0,0,20,0]},
         xaxis4=dict(
             tickvals=tickvals,
             ticktext=ticklabels,
@@ -298,21 +249,15 @@ def draw_hierarchical_pattern_overview(dataset, dataset_array, dataset_carbs, da
             range=[tickvals[0], tickvals[-1]]
         ),
         yaxis=dict(
-            # title='<b>Glucose</b>',
-            # title_font_size=12,
             range=[40,400],
             tickfont=dict(size=8)
         ),
         yaxis3=dict(
-            # title='<b>Carbs</b>',
-            # title_font_size=12,
             showticklabels=False,
             range=[-0.5, 0.5],
             showgrid=False
         ),
         yaxis4=dict(
-            # title='<b>Bolus</b>',
-            # title_font_size=12,
             showticklabels=False,
             range=[-0.5, 0.5],
             showgrid=False
@@ -439,7 +384,6 @@ def find_hypo_periods():
             if i in idx:
                 timestamps.append(clusters_timestamps[i] + clusters_timestamps[i + 1])
                 sgv.append(clusters_sgv[i] + clusters_sgv[i + 1])
-                # output.append(regions[i])
                 end_dates.append(clusters_timestamps[i + 1][-1])
             else:
                 timestamps.append(clusters_timestamps[i])
@@ -449,7 +393,6 @@ def find_hypo_periods():
 
 
 def draw_pattern_detail_plot(day, sgv_today, carbs_today, insulin_today, x_range):
-    # layout = go.Layout(width=300, height=50, margin=dict(t=25, b=10, l=0, r=0), plot_bgcolor='rgba(248,249,250,1)', )
     fig_timeline = make_subplots(rows=1, cols=1, specs=[[{"secondary_y": True}]])
 
     # sgv
@@ -527,11 +470,9 @@ def draw_pattern_detail_plot(day, sgv_today, carbs_today, insulin_today, x_range
             y=carbs_today.carbs,
             marker=dict(opacity=0.4),
             marker_color=colors['carbs'],
-            # xaxis='x2',
             yaxis='y2',
             width=8 * 3600 * 24,
         ),
-        # row=2, col=1
     )
 
     # insulin
@@ -541,17 +482,13 @@ def draw_pattern_detail_plot(day, sgv_today, carbs_today, insulin_today, x_range
             y=insulin_today.bolus,
             marker=dict(opacity=0.4),
             marker_color=colors['bolus'],
-            # xaxis='x2',
             yaxis='y3',
             width=8 * 3600 * 24,
         ),
     )
 
-    # fig_timeline.update_yaxes(range=y_range, autorange=False, tickmode='array', tickvals=[0] + target_range + [300, 450])
     fig_timeline.update_xaxes(type="date", autorange=False, range=x_range)
-    # fig_daily.update_xaxes(rangeslider_visible=True)
     fig_timeline.update_layout(xaxis_rangeslider_visible=False,
-                               # xaxis2_rangeslider_visible=False,
                                xaxis_type="date",
                                showlegend=False,
                                width=630, height=150,
@@ -559,7 +496,6 @@ def draw_pattern_detail_plot(day, sgv_today, carbs_today, insulin_today, x_range
                                plot_bgcolor='rgba(248,249,250,1)',
                                xaxis=dict(visible=False, showgrid=True),
                                yaxis=dict(
-                                   # showticklabels=False,
                                    range=[0, 400],
                                    tickfont_size=8,
                                    visible=False
@@ -581,8 +517,6 @@ def draw_pattern_detail_plot(day, sgv_today, carbs_today, insulin_today, x_range
 
                                font=dict(
                                    family=font,
-                                   # size=8,
-                                   # color="RebeccaPurple"
                                ),
                                )
 
@@ -810,20 +744,6 @@ def get_insight_data_hypos(filter_time_of_day=None, filter_meal_size=None):
     clusters = get_insight_clusters(dataset_clusters)
     n_clusters_ = len(np.unique(clusters))
 
-    # dataset = get_insight_dataset(*indices['sgv'], cluster=False)
-    # graphs_insights_hypos = []
-    # logs_indices = get_logs_from_indices(indices)
-    #
-    # for i in range(n_clusters_):
-    #     # dataset_cluster = dataset[clusters == i + 1]
-    #     dataset_cluster = [j for (j, v) in zip(logs_indices['sgv'], clusters == i + 1) if v]
-    #     dataset_cluster_carbs = [j for (j, v) in zip(logs_indices['carbs'], clusters == i + 1) if v]
-    #     dataset_cluster_bolus = [j for (j, v) in zip(logs_indices['insulin'], clusters == i + 1) if v]
-    #     graphs_insights_hypos.append(draw_hierarchical_pattern_overview(dataset_cluster, dataset[clusters == i + 1], dataset_cluster_carbs, dataset_cluster_bolus, 'Hypo start', time_before_hypo))
-
-
-
-
     dataset = get_insight_dataset(*indices['sgv'], cluster=False)
     graphs_insights_meals = []
     graphs_meal_overview = []
@@ -854,7 +774,6 @@ def get_insight_data_hypos(filter_time_of_day=None, filter_meal_size=None):
         carb_avg_after.append(carb_avg_after_tmp)
         bolus_avg_before.append(bolus_avg_before_tmp)
         bolus_avg_after.append(bolus_avg_after_tmp)
-        # time_between.append(get_time_between_carbs_bolus(dataset_cluster_carbs, dataset_cluster_bolus))
         start_bg, end_bg = get_start_end_bg(dataset_cluster)
         start_bgs.append(start_bg)
         end_bgs.append(end_bg)

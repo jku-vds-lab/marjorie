@@ -1,22 +1,17 @@
-from datetime import timedelta
-
-import plotly.graph_objects as go
-from plotly.subplots import make_subplots
-
-from helpers import get_df_of_date, get_infos_from_group
-from preprocessing import logs_sgv, date_max, colorscale, logs_sgv_plot, logs_carbs, logs_insulin
-from colors import colors, colors_agp
-from variables import target_range, font
 from datetime import datetime, timedelta
 
-from scipy.cluster import hierarchy
-from scipy.cluster.hierarchy import dendrogram
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
+import plotly.graph_objects as go
 import scipy
-from scipy.cluster.hierarchy import ward, fcluster
-import matplotlib
+from plotly.subplots import make_subplots
+from scipy.cluster import hierarchy
+from scipy.cluster.hierarchy import fcluster
+
+from colors import colors, colors_agp
+from helpers import get_df_of_date, get_infos_from_group
+from preprocessing import date_max, logs_sgv_plot, logs_carbs, logs_insulin
+from variables import target_range, font
 
 alpha_max_insulin = logs_insulin['bolus'].to_numpy().max()
 
@@ -50,28 +45,8 @@ def get_non_periodic_data(indices, idx):
     return sgv_today, carbs_today, insulin_today
 
 
-def draw_pattern_detail_plot(sgv_today, carbs_today, insulin_today, x_range, box_data=None, highlight_data=None):
+def draw_horizon_graph(sgv_today, carbs_today, insulin_today, x_range, box_data=None, highlight_data=None):
     fig = make_subplots(rows=3, cols=1, shared_xaxes=True, row_heights=[0.6, 0.2, 0.2], vertical_spacing=0.05)
-
-    # if highlight_data:
-    #     fig.add_shape(type="rect",
-    #                   x0=x_range[0], y0=y_range[0], x1=highlight_data[0], y1=y_range[1],
-    #                   line=dict(color="rgba(0,0,0,0)", dash='dot', width=1),
-    #                   fillcolor=colors['highlight']
-    #                   )
-    #
-    #     fig.add_shape(type="rect",
-    #                   x0=highlight_data[1], y0=y_range[0], x1=x_range[1], y1=y_range[1],
-    #                   line=dict(color="rgba(0,0,0,0)", dash='dot', width=1),
-    #                   fillcolor=colors['highlight']
-    #                   )
-    #
-    # if box_data:
-    #     box_x, box_y = box_data
-    #     fig.add_shape(type="rect",
-    #                   x0=x_range[0] + box_x[0], y0=box_y[0], x1=x_range[0] + box_x[1], y1=box_y[1],
-    #                   line=dict(color="black", dash='dot', width=1),
-    #                   )
 
     def transform_bg_scale(sgv):
         return 1.509 * (np.log(sgv) ** 1.084 - 5.381)
@@ -128,29 +103,6 @@ def draw_pattern_detail_plot(sgv_today, carbs_today, insulin_today, x_range, box
             row=1, col=1
         )
 
-        # # high = np.zeros(len(sgv_today))
-        # is_high = sgv_today['transform_high'] > 0
-        # changes = is_high.diff()
-        # changes.iloc[0] = False
-        # idx = [item for i in range(len(changes)-1) for item in [False, is_high.iloc[i]][not changes.iloc[i]:]]
-        # high = np.zeros(len(idx))
-        # timestamp = [item for i in range(len(changes)-1) for item in [sgv_today.timestamp.iloc[i - (not is_high.iloc[i])], sgv_today.timestamp.iloc[i]][not changes.iloc[i]:]]
-        # high[idx] = -0.2
-        #
-        # fig.add_trace(
-        #     go.Scatter(
-        #         x=timestamp,
-        #         y=high,
-        #         fill='tozeroy',
-        #         fillcolor=colors['bg_high'],
-        #         mode='lines',
-        #         line=dict(color='rgba(0,0,0,0)'),
-        #         connectgaps=False,
-        #         hoverinfo='skip'
-        #     ),
-        #     row=1, col=1
-        # )
-
     sgv_low = sgv_today.loc[sgv_today['low']]
     if len(sgv_low) > 1:
         # sgv_today['transform'] = sgv_today['sgv'].apply(transform_bg_scale)
@@ -178,17 +130,10 @@ def draw_pattern_detail_plot(sgv_today, carbs_today, insulin_today, x_range, box
             row=1, col=1
         )
 
-
-    # sgv_very_high = sgv_today.loc[sgv_today['high']]
     if (sgv_today['transform'] > 1.36).any():
-        # sgv_today['transform'] = sgv_today['sgv'].apply(transform_bg_scale)
         sgv_today['transform_very_high'] = sgv_today['transform']
-        # sgv_today['transform_very_high'][sgv_today['transform_very_high'] >= thresholds['very high']] = thresholds['very high']
         sgv_today['transform_very_high'][sgv_today['transform_very_high'] <= thresholds['very high']] = thresholds['very high']
         sgv_today['transform_very_high'] = sgv_today['transform_very_high'] - thresholds['very high']
-        # sgv_today['transform_very_high'] = sgv_today['transform_very_high'] + 0.2
-        # sgv_today['transform_very_high'][sgv_today['transform'] <= thresholds['very high']] = 0
-
 
         # above range
 
@@ -207,9 +152,7 @@ def draw_pattern_detail_plot(sgv_today, carbs_today, insulin_today, x_range, box
         )
 
     if (sgv_today['transform'] < -1.36).any():
-        # sgv_today['transform'] = sgv_today['sgv'].apply(transform_bg_scale)
         sgv_today['transform_very_low'] = sgv_today['transform']
-        # sgv_today['transform_very_high'][sgv_today['transform_very_high'] >= thresholds['very high']] = thresholds['very high']
         sgv_today['transform_very_low'][sgv_today['transform_very_low'] >= thresholds['very low']] = thresholds['very low']
         sgv_today['transform_very_low'] = sgv_today['transform_very_low'] - thresholds['very low']
         sgv_today['transform_very_low'] = sgv_today['transform_very_low'] * (-1)
@@ -235,12 +178,8 @@ def draw_pattern_detail_plot(sgv_today, carbs_today, insulin_today, x_range, box
     if not insulin_today.empty:
         fig = plot_treatments(fig, 3, insulin_today, 'bolus', 'U', 10)
 
-
-    # fig.update_yaxes(range=y_range, autorange=False, tickmode='array', tickvals=[0] + target_range + [300, 450])
-
     x_values, x_labels = get_infos_from_group('day')
     fig.update_xaxes(type="date", range=x_range, automargin=False, visible=True, showgrid=True, tickvals=x_values, ticktext=['' for _ in x_labels])
-    # fig_daily.update_xaxes(rangeslider_visible=True)
     fig.update_layout(xaxis_rangeslider_visible=False,
                       # xaxis2_rangeslider_visible=False,
                       # xaxis_type="date",
@@ -248,27 +187,6 @@ def draw_pattern_detail_plot(sgv_today, carbs_today, insulin_today, x_range, box
                       width=575, height=60,
                       margin=dict(t=0, b=20, l=0, r=0),
                       plot_bgcolor=colors['background'],
-                      # xaxis=dict(visible=False, showgrid=True),
-                      # yaxis=dict(
-                      #     # showticklabels=False,
-                      #     range=[0, 400],
-                      #     tickfont_size=8,
-                      #     visible=False
-                      # ),
-                      # yaxis2=dict(
-                      #     range=[0, max(logs_carbs.carbs)],
-                      #     tickfont_size=8,
-                      #     overlaying="y",
-                      #     showgrid=False,
-                      #     visible=False
-                      # ),
-                      # yaxis3=dict(
-                      #     range=[0, max(logs_insulin.bolus)],
-                      #     tickfont_size=8,
-                      #     overlaying="y",
-                      #     showgrid=False,
-                      #     visible=False
-                      # ),
                       yaxis=dict(
                           # showticklabels=False,
                           range=[0, 0.48 + 0.2],
@@ -381,32 +299,8 @@ def plot_treatments(fig, row, logs_today, log_type, unit, max_value):
     return fig
 
 
-def draw_pattern_detail_plot_curve(sgv_today, carbs_today, insulin_today, x_range, box_data=None, highlight_data=None, hide_xaxis=True):
-    # fig = make_subplots(rows=1, cols=1)
+def draw_overview_daily_curve_detailed(sgv_today, carbs_today, insulin_today, x_range, box_data=None, highlight_data=None, hide_xaxis=True):
     fig = make_subplots(rows=3, cols=1, shared_xaxes=True, row_heights=[0.86, 0.07, 0.07], vertical_spacing=0.01)
-
-    if highlight_data:
-        fig.add_shape(type="rect",
-                      x0=x_range[0], y0=y_range[0], x1=highlight_data[0], y1=y_range[1],
-                      line=dict(color="rgba(0,0,0,0)", dash='dot', width=1),
-                      fillcolor=colors['highlight'],
-                      row=1, col=1
-                      )
-
-        fig.add_shape(type="rect",
-                      x0=highlight_data[1], y0=y_range[0], x1=x_range[1], y1=y_range[1],
-                      line=dict(color="rgba(0,0,0,0)", dash='dot', width=1),
-                      fillcolor=colors['highlight'],
-                      row=1, col=1
-                      )
-
-    if box_data:
-        box_x, box_y = box_data
-        fig.add_shape(type="rect",
-                      x0=x_range[0] + box_x[0], y0=box_y[0], x1=x_range[0] + box_x[1], y1=box_y[1],
-                      line=dict(color="black", dash='dot', width=1),
-                      row=1, col=1
-                      )
 
     # sgv
     y_sgv = sgv_today.sgv.fillna(0)
@@ -487,13 +381,11 @@ def draw_pattern_detail_plot_curve(sgv_today, carbs_today, insulin_today, x_rang
     if not insulin_today.empty:
         fig = plot_treatments(fig, 3, insulin_today, 'bolus', 'U', 10)
 
-    # fig.update_yaxes(range=y_range, autorange=False, tickmode='array', tickvals=[0] + target_range + [300, 450])
     fig.update_xaxes(type="date", range=x_range, automargin=False)
 
     if hide_xaxis:
         fig.update_xaxes(visible=False)
 
-    # fig_daily.update_xaxes(rangeslider_visible=True)
     fig.update_layout(xaxis_rangeslider_visible=False,
                       # xaxis2_rangeslider_visible=False,
                       # xaxis_type="date",
@@ -519,173 +411,6 @@ def draw_pattern_detail_plot_curve(sgv_today, carbs_today, insulin_today, x_rang
                           range=[0, 1],
                           tickfont_size=8,
                           # overlaying="y",
-                          showgrid=False,
-                          visible=False
-                      ),
-                      font=dict(
-                          family=font,
-                          # size=8,
-                          # color="RebeccaPurple"
-                      ),
-                      paper_bgcolor='rgba(0,0,0,0)',
-                      )
-
-    if box_data:  # if agp
-        fig.update_xaxes(fixedrange=True, visible=False, showgrid=True)
-        fig.update_layout(dragmode="select", clickmode='event+select', selectdirection='h', margin=dict(t=0, b=0, l=0, r=0))
-
-    return fig
-
-
-def draw_pattern_detail_plot_curve_detailed(sgv_today, carbs_today, insulin_today, x_range, box_data=None, highlight_data=None):
-    fig = make_subplots(rows=1, cols=1)
-
-    if highlight_data:
-        fig.add_shape(type="rect",
-                      x0=x_range[0], y0=y_range[0], x1=highlight_data[0], y1=y_range[1],
-                      line=dict(color="rgba(0,0,0,0)", dash='dot', width=1),
-                      fillcolor=colors['highlight']
-                      )
-
-        fig.add_shape(type="rect",
-                      x0=highlight_data[1], y0=y_range[0], x1=x_range[1], y1=y_range[1],
-                      line=dict(color="rgba(0,0,0,0)", dash='dot', width=1),
-                      fillcolor=colors['highlight']
-                      )
-
-    if box_data:
-        box_x, box_y = box_data
-        fig.add_shape(type="rect",
-                      x0=x_range[0] + box_x[0], y0=box_y[0], x1=x_range[0] + box_x[1], y1=box_y[1],
-                      line=dict(color="black", dash='dot', width=1),
-                      )
-
-    # sgv
-    y_sgv = sgv_today.sgv.fillna(0)
-    fig.add_trace(
-        go.Scatter(
-            x=sgv_today.timestamp,
-            y=y_sgv,
-            mode='lines',
-            line=dict(color=colors['bg_target']),
-            connectgaps=False,
-            hovertext=sgv_today.sgv,
-            hoverinfo='text'
-        ),
-    )
-
-    # below range
-    sgv_low = sgv_today.loc[sgv_today['low']]
-    if len(sgv_low) > 1:
-        fig.add_trace(
-            go.Scatter(
-                x=sgv_low.timestamp.to_list() + [sgv_low.timestamp.iloc[-1], sgv_low.timestamp.iloc[0]],
-                y=sgv_low.sgv.fillna(0).to_list() + [target_range[0], target_range[0]],
-                fill='toself',
-                fillcolor=colors_agp['under_range_90th'],
-                mode='lines',
-                line=dict(color=colors['bg_low']),
-                connectgaps=False,
-                hoverinfo='skip'
-            ),
-        )
-
-    # above range
-    sgv_high = sgv_today.loc[sgv_today['high']]
-    if len(sgv_high) > 1:
-        fig.add_trace(
-            go.Scatter(
-                x=sgv_high.timestamp.to_list() + [sgv_high.timestamp.iloc[-1], sgv_high.timestamp.iloc[0]],
-                y=sgv_high.sgv.fillna(0).to_list() + [target_range[1], target_range[1]],
-                fill='toself',
-                fillcolor=colors_agp['above_range_90th'],
-                mode='lines',
-                line=dict(color=colors['bg_high']),
-                connectgaps=False,
-                hoverinfo='skip'
-            ),
-        )
-
-    # target
-    fig.add_trace(
-        go.Scatter(
-            x=sgv_today.timestamp,
-            y=[target_range[1]] * len(sgv_today),
-            mode='lines',
-            line=dict(color='white'),
-            connectgaps=False,
-            hoverinfo='skip'
-        ),
-    )
-
-    fig.add_trace(
-        go.Scatter(
-            x=sgv_today.timestamp,
-            y=[target_range[0]] * len(sgv_today),
-            mode='lines',
-            line=dict(color='white'),
-            connectgaps=False,
-            hoverinfo='skip'
-        ),
-    )
-
-    if not carbs_today.empty:
-        # carbs
-        fig.add_trace(
-            go.Bar(
-                x=carbs_today.timestamp,
-                y=carbs_today.carbs,
-                marker=dict(opacity=0.4),
-                marker_color=colors['carbs'],
-                # xaxis='x2',
-                yaxis='y2',
-                width=8 * 3600 * 24,
-            ),
-        )
-
-    if not insulin_today.empty:
-        # insulin
-        fig.add_trace(
-            go.Bar(
-                x=insulin_today.timestamp,
-                y=insulin_today.bolus,
-                marker=dict(opacity=0.4),
-                marker_color=colors['bolus'],
-                # xaxis='x2',
-                yaxis='y3',
-                width=8 * 3600 * 24,
-            ),
-        )
-
-    # fig.update_yaxes(range=y_range, autorange=False, tickmode='array', tickvals=[0] + target_range + [300, 450])
-    fig.update_xaxes(type="date", range=x_range, automargin=False)
-
-    # fig_daily.update_xaxes(rangeslider_visible=True)
-    fig.update_layout(xaxis_rangeslider_visible=False,
-                      # xaxis2_rangeslider_visible=False,
-                      # xaxis_type="date",
-                      showlegend=False,
-                      width=575, height=120,
-                      margin=dict(t=0, b=20, l=0, r=0),
-                      plot_bgcolor=colors['background'],
-                      # xaxis=dict(visible=False, showgrid=True),
-                      yaxis=dict(
-                          # showticklabels=False,
-                          range=[0, 400],
-                          tickfont_size=8,
-                          visible=False
-                      ),
-                      yaxis2=dict(
-                          range=[0, max(logs_carbs.carbs)],
-                          tickfont_size=8,
-                          overlaying="y",
-                          showgrid=False,
-                          visible=False
-                      ),
-                      yaxis3=dict(
-                          range=[0, max(logs_insulin.bolus)],
-                          tickfont_size=8,
-                          overlaying="y",
                           showgrid=False,
                           visible=False
                       ),

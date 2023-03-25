@@ -1,21 +1,14 @@
 import numpy as np
 import pandas as pd
-from datetime import date, timedelta, datetime
-
-from plotly.subplots import make_subplots
-from scipy import interpolate as interp
-import matplotlib.pyplot as plt
-import datetime as dt
-from math import exp, pow
 import plotly.express as px
 import plotly.graph_objects as go
+from plotly.subplots import make_subplots
+from scipy import interpolate as interp
 
 from colors import colors, colors_agp, colors_agp_bolus
-from preprocessing import logs_sgv, logs_insulin, logs_carbs, date_min, date_max, logs_insulin_activity, days, start_date, end_date
-from variables import target_range, target_range_extended
-from helpers import get_tir, get_infos_from_group, get_df_between_dates
-
-font = 'Verdana, sans-serif'
+from helpers import get_infos_from_group, get_df_between_dates
+from preprocessing import logs_sgv, logs_insulin, logs_carbs, logs_insulin_activity, days, start_date, end_date
+from variables import target_range, target_range_extended, font
 
 
 def calculate_stats(logs, log_type, group, seasonal=True):
@@ -118,10 +111,6 @@ def calculate_stats(logs, log_type, group, seasonal=True):
 
 
 def add_placeholder_dates(logs, log_type):
-    # date_min = min(logs_sgv.timestamp.min(), logs_insulin.timestamp.min(), logs_carbs.timestamp.min())
-    # date_max = max([logs_sgv.timestamp.max(), logs_insulin.timestamp.max(), logs_carbs.timestamp.max()])
-    # delta = date_max - date_min
-    # days = [date_min + timedelta(days=i) for i in range(delta.days + 1)]
 
     extra_rows = pd.DataFrame({
         'timestamp': days,
@@ -173,10 +162,6 @@ def calculate_agp(logs, log_type, smoothed=False, h=24, res=10000):
     p75 = f75(x)
     p90 = f90(x)
 
-    # start = datetime.combine(dt.date.today(), dt.time(0))
-    # total_seconds = h * 60 * 60
-    # step = total_seconds / res
-    # x = [(start + timedelta(seconds=int(i * step))).time() for i in range(res)]
     return x, p10, p25, p50, p75, p90
 
 
@@ -212,10 +197,6 @@ def draw_seasonal_graph(group, d_start, d_end):
     fig = make_subplots(rows=2, cols=1, shared_xaxes=False, row_heights=[0.4, 0.6], vertical_spacing=0.01)
     x_values, x_labels = get_infos_from_group(group)
     fig.update_layout(
-        # xaxis3_rangeslider_visible=False,
-        # xaxis_rangeslider_visible=False,
-        # xaxis2_rangeslider_visible=False,
-        # yaxis_range=[0, 350],
         showlegend=False,
         width=330,
         height=250,
@@ -242,7 +223,6 @@ def draw_seasonal_graph(group, d_start, d_end):
             fixedrange=True
         ),
         margin=dict(t=15, b=10, l=15, r=10),
-        # paper_bgcolor='rgba(0,0,0,0)',
         plot_bgcolor=colors['background'],
         paper_bgcolor=colors['background'],
     )
@@ -287,33 +267,22 @@ def draw_agp_carbs_bolus():
 
 
 def draw_seasonal_graph_day(start_date, end_date, weekday_filter=None):
-    # layout = go.Layout(showlegend=False, width=800, height=250, margin=dict(t=0, b=0))
     fig_agp = make_subplots(rows=3, cols=1, shared_xaxes=True, row_heights=[0.8, 0.1, 0.1], vertical_spacing=0.01)
-    # , subplot_titles=('<b>Glucose</b> mg/dL', '<b>Carbs</b> g', '<b>Bolus</b> U')
-    # fig_agp = make_subplots(rows=1, cols=1, shared_xaxes=True, row_heights=[1], vertical_spacing=0.07, subplot_titles=('<b>Glucose</b> mg/dL'))
     fig_agp = draw_agp(fig_agp, calculate_agp(get_df_between_dates(logs_sgv, start_date, end_date, weekday_filter), 'sgv'), row=1, hover=False)
     logs_insulin_activity_extended = logs_insulin_activity.copy()
     logs_insulin_activity_extended['insulin_activity'] = logs_insulin_activity_extended['insulin_activity'] * 100
-    # fig_agp = draw_agp(fig_agp, calculate_agp(logs_insulin_activity_extended, 'insulin_activity'), row=2)
-
     fig_agp = draw_barcode_plot(fig_agp, get_df_between_dates(logs_carbs, start_date, end_date, weekday_filter), 'carbs', row=2)
     fig_agp = draw_barcode_plot(fig_agp, get_df_between_dates(logs_insulin, start_date, end_date, weekday_filter), 'bolus', row=3)
-    # print(fig_agp)
     x_values, x_labels = get_infos_from_group('day')
     fig_agp.update_layout(
-        # xaxis3_rangeslider_visible=False,
-        # xaxis_rangeslider_visible=False,
-        # xaxis2_rangeslider_visible=False,
         yaxis_range=[30, 300],
         showlegend=False,
         width=575,
         height=140,
-        # xaxis=dict(fixedrange=True),
         xaxis3=dict(
             # tickmode='array',
             tickvals=x_values,
             showgrid=True,
-            # ticktext=x_labels,
             range=[0, 24],
             visible=False
         ),
@@ -322,42 +291,30 @@ def draw_seasonal_graph_day(start_date, end_date, weekday_filter=None):
             range=[1, 2],
             fixedrange=True,
             visible=False
-            # title='Bolus'
         ),
         yaxis2=dict(
             showticklabels=False,
             range=[1, 2],
             fixedrange=True,
             visible=False
-            # title='Carbs'
         ),
         yaxis=dict(
             tickfont_size=8,
             tickvals=[0, 70, 180, 300],
             fixedrange=True,
             visible=False
-            # title='Glucose'
         ),
         font=dict(
             family=font,
-            # size=8,
-            # color="RebeccaPurple"
         ),
         margin=dict(t=5, b=5, l=0, r=0),
-        # paper_bgcolor='rgba(0,0,0,0)',
         plot_bgcolor=colors['background'],
     )
     fig_agp.update_layout(dragmode="select", clickmode='event+select')
-    # fig_agp.update_xaxes(rangeslider_thickness=0.05)
-    # print(fig_agp.layout)
-    # fig_agp.layout.annotations[0].update(x=0.06, font=dict(family=font, size=10))
-    # fig_agp.layout.annotations[1].update(x=0.03, font=dict(family=font, size=10))
-    # fig_agp.layout.annotations[2].update(x=0.03, font=dict(family=font, size=10))
     return fig_agp
 
 
 def draw_full_agp(start_date, end_date, weekday_filter=None):
-    # layout = go.Layout(showlegend=False, width=800, height=250, margin=dict(t=0, b=0))
     fig_agp = make_subplots(rows=4, cols=1, shared_xaxes=True, row_heights=[0.5, 0.1, 0.3, 0.1], vertical_spacing=0.07, subplot_titles=('<b>Glucose</b> mg/dL', '<b>Carbs</b> g', '<b>Bolus</b> U', ''))
     fig_agp = draw_agp(fig_agp, calculate_agp(get_df_between_dates(logs_sgv, start_date, end_date, weekday_filter), 'sgv'), row=1)
     logs_insulin_activity_extended = logs_insulin_activity.copy()
@@ -366,8 +323,6 @@ def draw_full_agp(start_date, end_date, weekday_filter=None):
 
     fig_agp = draw_barcode_plot(fig_agp, get_df_between_dates(logs_carbs, start_date, end_date, weekday_filter), 'carbs', row=2, spacing=0.08)
     fig_agp = draw_barcode_plot(fig_agp, get_df_between_dates(logs_insulin, start_date, end_date, weekday_filter), 'bolus', row=4, spacing=0.08)
-    # print(fig_agp)
-    # x_values, x_labels = get_infos_from_group('day')
     x_values = [0.5, 3, 6, 9, 12, 15, 18, 21, 24]
     x_labels = ['0 am', '3 am', '6 am', '9 am', '12 am', '3 pm', '6 pm', '9 pm', '0 pm']
     fig_agp.update_layout(
@@ -375,14 +330,11 @@ def draw_full_agp(start_date, end_date, weekday_filter=None):
         showlegend=False,
         width=620,
         height=400,
-        # xaxis=dict(fixedrange=True),
         xaxis1=dict(
-            # tickmode='array',
             tickvals=x_values,
             showgrid=True,
             ticktext=x_labels,
             range=[0, 24],
-            # title='Time',
             visible=False
         ),
         yaxis4=dict(
@@ -390,14 +342,12 @@ def draw_full_agp(start_date, end_date, weekday_filter=None):
             range=[1, 2],
             fixedrange=True,
             visible=False
-            # title='Bolus'
         ),
         yaxis2=dict(
             showticklabels=False,
             range=[1, 2],
             fixedrange=True,
             visible=False
-            # title='Carbs'
         ),
         yaxis3=dict(
             range=[0, 10],
@@ -413,16 +363,11 @@ def draw_full_agp(start_date, end_date, weekday_filter=None):
         ),
         font=dict(
             family=font,
-            # size=8,
-            # color="RebeccaPurple"
         ),
         margin=dict(t=30, b=5, l=0, r=10),
-        # paper_bgcolor='rgba(0,0,0,0)',
         plot_bgcolor=colors['background'],
     )
     fig_agp.update_layout(dragmode="select", clickmode='event+select')
-    # fig_agp.update_xaxes(rangeslider_thickness=0.05)
-    # print(fig_agp.layout)
     fig_agp.layout.annotations[0].update(x=0.06, font=dict(family=font, size=10))
     fig_agp.layout.annotations[1].update(x=0.03, font=dict(family=font, size=10))
     fig_agp.layout.annotations[2].update(x=0.03, font=dict(family=font, size=10))
@@ -430,21 +375,16 @@ def draw_full_agp(start_date, end_date, weekday_filter=None):
 
 
 def agp_xaxis(width=590, margin_left=10):
-    # layout = go.Layout(showlegend=False, width=800, height=250, margin=dict(t=0, b=0))
     fig_agp = make_subplots(rows=1, cols=1)
     fig_agp = draw_agp(fig_agp, calculate_agp(get_df_between_dates(logs_sgv, start_date, end_date), 'sgv'), row=1)
 
-    # x_values, x_labels = get_infos_from_group('day')
     x_values = [0.5, 3, 6, 9, 12, 15, 18, 21, 24]
     x_labels = ['0 am', '3 am', '6 am', '9 am', '12 am', '3 pm', '6 pm', '9 pm', '0 pm']
     fig_agp.update_layout(
-        # yaxis_range=[30, 300],
         showlegend=False,
         width=width,
         height=30,
-        # xaxis=dict(fixedrange=True),
         xaxis=dict(
-            # tickmode='array',
             tickvals=x_values,
             showgrid=True,
             ticktext=x_labels,
@@ -456,11 +396,8 @@ def agp_xaxis(width=590, margin_left=10):
         ),
         font=dict(
             family=font,
-            # size=8,
-            # color="RebeccaPurple"
         ),
         margin=dict(t=30, b=30, l=margin_left, r=0),
-        # paper_bgcolor='rgba(0,0,0,0)',
         plot_bgcolor=colors['background'],
     )
     fig_agp.update_layout(dragmode="select", clickmode='event+select')
@@ -478,17 +415,9 @@ def get_barcode_plot_data(logs, log_type):
 
 
 def draw_barcode_plot(fig, logs, log_type, row, spacing=0.25):
-    # a = logs.timestamp
-    # x = a.dt.hour + a.dt.minute / 60.0
-    # x = x.to_numpy()
-    #
-    # alphas = logs[log_type].to_numpy()
-    # alphas = alphas / alphas.max() * 0.8
-
     x, alphas = get_barcode_plot_data(logs, log_type)
 
     for i in np.arange(1, 2, spacing):
-        # ax.scatter(x, [i]*len(x), marker="s", alpha=alphas, color=color, edgecolors='none')
         fig.add_trace(
             go.Scattergl(
                 x=x,
@@ -500,34 +429,6 @@ def draw_barcode_plot(fig, logs, log_type, row, spacing=0.25):
         )
     fig.update_layout(plot_bgcolor=colors['background'])
     return fig
-
-
-# def fill_around(x, Ylow, Ytop, colors):
-#     bottom1 = np.array([max(target_range[1], y) for y in Ylow])
-#     top1 = np.array([max(target_range[1], y) for y in Ytop])
-#     # x, y = highlight_data(x, Ytop, target_range[1])
-#     x = np.array(x)
-#     y = np.array(Ytop)
-#
-#     y_indices = y > target_range[1]
-#
-#     fill_top = go.Scatter(x=np.append(x, np.flip(x)),
-#                           y=np.append(bottom1, np.flip(top1)),
-#                           # x=np.concatenate([x[y > target_range[1]], np.array([x[-1], x[0]])]),
-#                           # y=np.concatenate([y[y_indices], np.array(2*[target_range[1]])]),
-#                           mode="lines", line=dict(color='rgba(255, 255, 255, 0.5)'), hoverinfo='skip',
-#                           fillcolor=colors[1], fill='toself',
-#                           showlegend=False)
-#
-#     top2 = np.array([min(target_range[0], y) for y in Ytop])
-#     bottom2 = np.array([min(target_range[0], y) for y in Ylow])
-#     fill_bottom = go.Scatter(x=np.append(x, np.flip(x)),
-#                              y=np.append(bottom2, np.flip(top2)),
-#                              mode="lines", line=dict(color='rgba(255, 255, 255, 0.5)'), hoverinfo='skip',
-#                              fillcolor=colors[0], fill='toself',
-#                              showlegend=False)
-#
-#     return fill_top, fill_bottom
 
 
 def update_seasonal_graph_daily(data, start_date, end_date):
@@ -679,7 +580,6 @@ def draw_agp(fig_agp, data, colors=colors_agp, row=False, hover=False):
         fig_agp.add_trace(trace_5)
         fig_agp.add_trace(trace_6)
         fig_agp.add_trace(trace_7)
-        # fig_agp.add_trace(test_1)
 
     if hover:
         fig_agp.add_trace(
@@ -702,44 +602,12 @@ def draw_agp(fig_agp, data, colors=colors_agp, row=False, hover=False):
                 bordercolor='rgba(255, 255, 255, 0)',
                 namelength=-1,
             ),
-            # hovermode='x'
         )
 
     return fig_agp
 
 
-# def draw_agp(data_list, layout):
-#
-#     # layout = go.Layout(showlegend=False, width=800, height=250, margin=dict(t=10, b=10))
-#     # fig_agp = go.Figure(layout=layout, layout_yaxis_range=[0, 350])
-#
-#     for row, data in enumerate(data_list):
-#         fig_agp = draw_agp_traces(fig_agp, data, row)
-#     return fig_agp
-
-
 def draw_boxplot(group):
-    # group_object = logs.groupby([group])
-    # n_groups = group_object.ngroups
-    #
-    # for i in range(n_groups):
-    #     a = group_object.get_group(i)[log_type]
-    # stats = calculate_stats(logs, log_type, 'weekday')
     fig = px.box(logs_sgv, x=group, y='sgv', points=False)
     fig.update_traces(quartilemethod="inclusive")
     return fig
-
-# def draw_twin_bars():
-#     fig = go.Figure(
-#         data=[
-#             go.Bar(name='Population', x=datasort["country"], y=datasort["population"], yaxis='y', offsetgroup=1),
-#             go.Bar(name='GDP per Capita', x=datasort["country"], y=datasort["gdpPerCapita"], yaxis='y2', offsetgroup=2)
-#         ],
-#         layout={
-#             'yaxis': {'title': 'Population (in Billions) '},
-#             'yaxis2': {'title': 'GDP per Capita (in Millions)', 'overlaying': 'y', 'side': 'right'}
-#         }
-#     )
-#
-#     # Change the bar mode
-#     fig.update_layout(barmode='group')

@@ -4,8 +4,6 @@ import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
-
-from aggregations import calculate_stats
 from colors import colors
 from helpers import dt_details_function, highlight_data, get_df_of_date
 from preprocessing import logs_sgv, logs_insulin, logs_carbs, date_min, date_max, days, colorscales, colorscale, targets, colorscale_categorical, logs_br_default, logs_br
@@ -20,8 +18,6 @@ end_date = date_max
 y_range = [-400, 450]
 
 layout = go.Layout(width=760, height=500, margin=dict(t=25, b=10, l=0, r=0), plot_bgcolor='rgba(248,249,250,1)', )
-# fig_daily = make_subplots(rows=2, cols=1, shared_xaxes=True)
-# fig_timeline = go.Figure(layout=layout)
 
 
 def draw_daily_plot(day, zoom_data=None, cutoff_value=1.5, bar_width_factor=15):
@@ -31,7 +27,6 @@ def draw_daily_plot(day, zoom_data=None, cutoff_value=1.5, bar_width_factor=15):
     if zoom_data:
         x_range = zoom_data
     else:
-        # x_range = [datetime(day.year, day.month, day.day), datetime(day.year, day.month, day.day) + timedelta(days=1)]
         x_range = x_range_original.copy()
 
     fig_timeline = make_subplots(rows=4, cols=1, shared_xaxes=True, row_heights=[0.4, 0.2, 0.2, 0.2], vertical_spacing=0.05,
@@ -48,7 +43,6 @@ def draw_daily_plot(day, zoom_data=None, cutoff_value=1.5, bar_width_factor=15):
         x=np.concatenate([x_range_original, x_range_original[::-1]]),
         y=np.concatenate([[target_range[1], target_range[1]], [target_range[0], target_range[0]][::-1]]),
         line=dict(color='rgba(255,255,255, 1)', dash='dash'),
-        # hoveron='points',
     ),
         row=1, col=1,
     )
@@ -165,18 +159,14 @@ def draw_daily_plot(day, zoom_data=None, cutoff_value=1.5, bar_width_factor=15):
             row=4, col=1
         )
 
-    # fig_timeline.update_yaxes(range=y_range, autorange=False, tickmode='array', tickvals=[0] + target_range + [300, 450])
     fig_timeline.update_xaxes(type="date", autorange=False, range=x_range)
-    # fig_daily.update_xaxes(rangeslider_visible=True)
     fig_timeline.update_layout(xaxis_rangeslider_visible=False,
                                xaxis2_rangeslider_visible=False,
                                xaxis_type="date",
                                showlegend=False,
-                               # width=620, height=500,
                                margin=dict(t=25, b=10, l=0, r=0),
                                plot_bgcolor='rgba(248,249,250,1)',
                                yaxis=dict(
-                                   # showticklabels=False,
                                    range=[0, 400],
                                    tickfont_size=8,
                                ),
@@ -189,14 +179,11 @@ def draw_daily_plot(day, zoom_data=None, cutoff_value=1.5, bar_width_factor=15):
                                    tickfont_size=8,
                                ),
                                yaxis4=dict(
-                                   # range=[0, max(max(logs_br.br), max(logs_br_default.br_default))],
                                    range=[0, 1.5],
                                    tickfont_size=8,
                                ),
                                font=dict(
                                    family=font,
-                                   # size=8,
-                                   # color="RebeccaPurple"
                                ),
                                )
     fig_timeline.layout.annotations[0].update(x=0.06, font=dict(family=font, size=10))
@@ -208,7 +195,6 @@ def draw_daily_plot(day, zoom_data=None, cutoff_value=1.5, bar_width_factor=15):
 
 
 def create_basal_data(logs, log_type):
-    # print(logs)
     if len(logs) > 24:
         logs = logs[(logs['timestamp'].dt.hour <= logs.timestamp.iloc[-1].hour)]
     x = np.repeat(logs.timestamp, 2)

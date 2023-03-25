@@ -37,19 +37,7 @@ colors_agp_bolus = {
 
 alpha = 0.5
 colors_patterns = [
-#     'rgba(114, 158, 206, {})'.format(alpha),
-#     'rgba(255, 158, 74, {})'.format(alpha),
-#     'rgba(103, 191, 92, {})'.format(alpha),
-#     'rgba(237, 102, 93, {})'.format(alpha),
-#     'rgba(173, 139, 201, {})'.format(alpha),
-#
-#     'rgba(114, 158, 206, {})'.format(alpha),
-#     'rgba(255, 158, 74, {})'.format(alpha),
-#     'rgba(103, 191, 92, {})'.format(alpha),
-#     'rgba(237, 102, 93, {})'.format(alpha),
-#     'rgba(173, 139, 201, {})'.format(alpha),
-# ]
-'rgba(114, 158, 206, {})'.format(alpha),
+    'rgba(114, 158, 206, {})'.format(alpha),
     'rgba(255, 158, 74, {})'.format(alpha),
     'rgba(103, 191, 92, {})'.format(alpha),
     'rgba(237, 102, 93, {})'.format(alpha),
@@ -220,21 +208,6 @@ colors_pattern_curves = [
 ]
 
 color_secondary = '#5c636a'
-
-# colormap_heatmap = [
-#     [0, 'rgb(0,0,255)'],
-#     [1, 'rgb(255,0,0)']
-# ]
-
-# colors_heatmap = [
-#     'rgb(221, 79, 55)',
-#     'rgb(227, 110, 91)',
-#     'rgb(241, 190, 165)',
-#     'rgb(176, 213, 188)',
-#     'rgb(137, 204, 212)',
-#     'rgb(0, 134, 176)',
-#     'rgb(0, 99, 154)'
-# ]
 
 colors_heatmap = [
     'rgb(221, 79, 55)',

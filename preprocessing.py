@@ -1,12 +1,11 @@
-import pandas as pd
-from helpers import convert_datestrings_df, date_range, construct_colorscale, convert_datestring
-from datetime import date, timedelta, datetime
-import datetime as dt
+from datetime import timedelta, datetime
 from math import exp, pow
-import numpy as np
-from helpers import round_datetime, get_deltas
-import plotly.express as px
 
+import numpy as np
+import pandas as pd
+
+from helpers import convert_datestrings_df, date_range, construct_colorscale, convert_datestring
+from helpers import round_datetime, get_deltas
 from variables import target_range, initial_number_of_days
 
 basal_profile_name = 'FirstOne'
@@ -89,10 +88,7 @@ logs_br = pd.concat([logs_br_default.copy().rename(columns={'br_default': 'br'})
 logs_br = logs_br.sort_values(by='timestamp')
 
 for i in range(len(df_tbr)):
-    # logs_br = logs_br[(logs_br['timestamp'] >= df_tbr['timestamp'].iloc[i]) & (logs_br['timestamp'] <= df_tbr['end_date'].iloc[i])]
     logs_br = logs_br.drop(logs_br[(logs_br['timestamp'] > df_tbr['timestamp'].iloc[i]) & (logs_br['timestamp'] < df_tbr['end_date'].iloc[i])].index)
-
-# logs_br = logs_br_default.copy()
 
 def get_insulin_activity(logs, tp=55, td=360):
     timestamp = logs.timestamp
