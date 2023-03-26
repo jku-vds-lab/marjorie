@@ -15,7 +15,7 @@ from colors import colors, colors_agp, colors_patterns, colors_pattern_curves, c
 from helpers import get_df_between_dates, get_log_indices, construct_colorscale
 from overview import hierarchy_cluster
 from preprocessing import logs_sgv, logs_carbs, logs_insulin, start_date_insights, end_date
-from variables import target_range, font
+from variables import target_range, font, num_insight_patterns
 from variables import time_before_meal, time_after_meal, times_of_day, time_before_hypo, time_after_hypo
 
 
@@ -730,6 +730,15 @@ def get_insight_data_meals(filter_time_of_day=None, filter_meal_size=None):
         start_bgs.append(start_bg)
         end_bgs.append(end_bg)
     graphs_all_curves = get_curve_overview_plot(dataset_clusters, dataset_unfiltered)
+
+    graphs_meal_overview += [{}] * (num_insight_patterns - n_clusters_)
+    graphs_insights_meals += [{}] * (num_insight_patterns - n_clusters_)
+    start_bgs += [1] * (num_insight_patterns - n_clusters_)
+    time_between += [1] * (num_insight_patterns - n_clusters_)
+    carbs_sums += [1] * (num_insight_patterns - n_clusters_)
+    end_bgs += [1] * (num_insight_patterns - n_clusters_)
+    bolus_sums += [1] * (num_insight_patterns - n_clusters_)
+
     return n_clusters_, most_occurring, graphs_meal_overview, graphs_all_curves, graphs_insights_meals, start_bgs, time_between, carbs_sums, end_bgs, bolus_sums
 
 def get_insight_data_hypos(filter_time_of_day=None, filter_meal_size=None):
