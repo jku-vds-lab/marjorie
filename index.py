@@ -5,7 +5,7 @@ from dash import dcc, html, ctx
 
 from aggregations import draw_seasonal_graph_day, draw_full_agp
 from daily import draw_daily_plot
-from layout import app, layout_daily, layout_agp, layout_overview
+from layout import app, layout_daily, layout_agp, layout_overview, layout_insights
 from dash_extensions.enrich import Output, DashProxy, Input, MultiplexerTransform, State, callback_context, ALL
 
 from overview import draw_horizon_graph, get_daily_data, get_x_range_for_day, draw_overview_daily_curve_detailed
@@ -22,8 +22,8 @@ def render_page_content(pathname):
         return layout_agp
     if pathname == "/daily":
         return layout_daily
-    # elif pathname == "/insights":
-    #     return layout_insights
+    elif pathname == "/insights":
+        return layout_insights
     return None
 
 

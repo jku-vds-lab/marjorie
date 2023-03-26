@@ -11,6 +11,7 @@ num_segments = 12
 window_size = 2
 n_clusters = 4
 num_horizon_graphs = 30
+num_insight_patterns = 15
 num_insight_details = 50
 time_before_meal = 1
 time_after_meal = 3

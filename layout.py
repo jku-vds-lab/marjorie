@@ -14,7 +14,7 @@ from overview import draw_horizon_graph, get_daily_data, get_x_range_for_day, ge
 from preprocessing import dates, logs_sgv, date_max, date_min, start_date, end_date, sgv_array_for_agp, date_dict, logs_carbs, logs_insulin, logs_br_default, start_date_insights
 from statistics import get_tir_plot, get_statistics_day, get_statistics_days
 from helpers import convert_datestring, get_df_between_dates, get_tir, get_statistics, check_timebox, get_log_indices, calculate_tir_time, get_mean_per_day, get_df_of_date
-from variables import num_horizon_graphs, n_filters, initial_number_of_days, num_insight_details, time_before_meal, time_after_meal
+from variables import num_horizon_graphs, n_filters, initial_number_of_days, num_insight_details, time_before_meal, time_after_meal, num_insight_patterns
 from assets.styles import *
 import re
 from datetime import datetime, timedelta
@@ -1284,34 +1284,486 @@ layout_overview = html.Div(
     ]
 )
 
-# layout_agp = html.Div(
-#                     [
-#                         html.Div(
-#                             dbc.Card(
-#                                 children=
-#                                 [
-#                                     # dbc.CardHeader('AGP'),
-#                                     dbc.CardBody(
-#                                         dcc.Graph(
-#                                             id='seasonal_day_graph',
-#                                             figure=draw_seasonal_graph_day(start_date, end_date),
-#                                             config={
-#                                                 'displayModeBar': False
-#                                             }
-#                                         )
-#                                     )
-#                                 ],
-#                                 style={'padding': '0rem 0rem 0rem 60px'},  # ice: 6rem
-#                                 className='image-border',
-#                                 # color=colors['background']
-#                             ),
-#                             style={'position': 'sticky', 'top': '0', 'z-index': '900'},
-#                         ),
-#                         html.Div(
-#                             children=dcc.Graph(
-#                                 figure=agp_xaxis()
-#                             ),
-#                             style={'position': 'fixed', 'bottom': '0', 'z-index': '9000', 'padding': '0rem 0rem 0rem 60px'}),
-#                         # pattern_details_agp_card
-#                     ]
-# )
+################################################################################
+# INSIGHTS SECTION
+################################################################################
+
+n_clusters_, most_occurring, graphs_meal_overview, graphs_all_curves, graphs_insights_meals, start_bgs, time_between, carbs_sums, end_bgs, bolus_sums = get_insight_data_meals()
+
+styles = [{'display': 'inline'}] * n_clusters_ + [{'display': 'none'}] * (num_insight_patterns - n_clusters_)
+
+layout_insights = dbc.Tabs(
+    [dbc.Tab(
+        dbc.Row(
+            [
+                ################################################################################
+                # PATTERN SCREEN
+                ################################################################################
+                dbc.Col(
+                    ################################################################################
+                    # DISPLAYED PATTERN DIVS
+                    ################################################################################
+                    [
+                        # html.Div(children='{} patterns were found.'.format(n_clusters_), id='n_patterns_meals', style={'font-family': font, 'font-size': 'medium', 'padding': '1% 0% 2% 2%'}),
+                        html.Div(
+                            [
+                                ################################################################################
+                                # PATTERN HEADING
+                                ################################################################################
+                                dbc.Row(
+                                    [
+                                        dbc.Col(
+                                            html.Div('Pattern {}'.format(i + 1), style={'font-family': font, 'font-size': 'small', 'padding': '10% 0% 0% 10%', 'font-weight': 'bold'}),
+                                            width=2
+                                        ),
+                                    ]
+                                ),
+                                ################################################################################
+                                # PATTERN CONTENT
+                                ################################################################################
+                                dbc.Row(
+                                    [
+                                        ################################################################################
+                                        # PATTERN GRAPH
+                                        ################################################################################
+                                        dbc.Col(
+                                            [
+                                                dcc.Graph(
+                                                    figure=graphs_insights_meals[i],
+                                                    id='meal_insights_overview_graph_{}'.format(i),
+                                                    config={
+                                                        'displayModeBar': False
+                                                    }
+                                                ),
+                                            ],
+                                        ),
+                                        ################################################################################
+                                        # PATTERN STATISTICS
+                                        ################################################################################
+                                        dbc.Col(
+                                            [
+                                                ################################################################################
+                                                # BAR CHART
+                                                ################################################################################
+                                                dbc.Row(
+                                                    dcc.Graph(
+                                                        figure=graphs_meal_overview[i],
+                                                        id='meal_insights_bar_graph_{}'.format(i),
+                                                        config={
+                                                            'displayModeBar': False
+                                                        }
+                                                    ),
+                                                    style={'padding': '0 0 5%'}
+                                                ),
+                                                ################################################################################
+                                                # STATISTIC CARDS
+                                                ################################################################################
+                                                dbc.Row(
+                                                    [
+                                                        dbc.Card(
+                                                            [
+                                                                dbc.Row(html.Div(children='before',
+                                                                                 style={'font-family': font, 'font-size': 'xx-small', 'padding': '10% 0% 0%', 'text-align': 'center', 'font-weight': 'bold'})),
+                                                                html.Div(
+                                                                    [
+                                                                        html.Div(children=str(start_bgs[i]), id={'type': 'sgv_before', 'index': i},
+                                                                                 style={'font-family': font, 'font-size': 'small', 'font-weight': 'bold',
+                                                                                        'display': 'inline-block', }),
+                                                                        html.Div(children='  mg/dL', style={'font-family': font, 'font-size': '20%', 'display': 'inline-block'}),
+                                                                    ],
+                                                                    style={'text-align': 'center', 'padding': '12% 0'}
+                                                                ),
+                                                            ],
+                                                            style={'height': '7rem', 'width': '7rem', 'margin': '0 2% 0 0'},
+                                                            className='image-border-top',
+                                                            color=colors_heatmap[list(np.array(targets_heatmap) > start_bgs[i]).index(True) - 1],
+                                                            id={'type': 'card_sgv_before', 'index': i}
+                                                        ),
+                                                        dbc.Card(
+                                                            [
+                                                                dbc.Row(html.Div(children='prebolus',
+                                                                                 style={'font-family': font, 'font-size': 'xx-small', 'padding': '3% 0% 0%', 'text-align': 'center', 'font-weight': 'bold'})),
+                                                                html.Div(
+                                                                    [
+                                                                        html.Div(children=str(time_between[i]), id={'type': 'interval', 'index': i},
+                                                                                 style={'font-family': font, 'font-size': 'small', 'font-weight': 'bold',
+                                                                                        'display': 'inline-block', }),
+                                                                        html.Div(children='  min', style={'font-family': font, 'font-size': '20%', 'display': 'inline-block'}),
+                                                                    ],
+                                                                    style={'text-align': 'center', 'padding': '0% 0'}
+                                                                ),
+                                                            ],
+                                                            style={'height': '4rem', 'width': '7rem', 'margin': '0 0 0 0'},
+                                                            className='image-border-left',
+                                                            color=get_prebolus_button_color(time_between[i]),
+                                                            id={'type': 'card_interval', 'index': i}
+                                                        ),
+                                                        dbc.Card(
+                                                            [
+                                                                dbc.Row(html.Div(children='factor',
+                                                                                 style={'font-family': font, 'font-size': 'xx-small', 'padding': '3% 0% 0%', 'text-align': 'center', 'font-weight': 'bold'})),
+                                                                html.Div(
+                                                                    [
+                                                                        html.Div(children=str(round(carbs_sums[i] / bolus_sums[i])), id={'type': 'factor', 'index': i},
+                                                                                 style={'font-family': font, 'font-size': 'small',
+                                                                                        'font-weight': 'bold',
+                                                                                        'display': 'inline-block', }),
+                                                                        html.Div(children='  g/U', style={'font-family': font, 'font-size': '20%', 'display': 'inline-block'}),
+                                                                    ],
+                                                                    style={'text-align': 'center', 'padding': '0% 0'}
+                                                                ),
+                                                            ],
+                                                            style={'height': '4rem', 'width': '7rem', 'margin': '0 0 0 0'},
+                                                            className='image-border-right',
+                                                            color='rgba(157, 164, 169,' + str(min((carbs_sums[i] / bolus_sums[i]) / 10, 1)) + ')',
+                                                            id={'type': 'card_factor', 'index': i}
+                                                        ),
+                                                    ],
+                                                ),
+                                                dbc.Row(
+                                                    [
+                                                        dbc.Card(
+                                                            [
+                                                                dbc.Row(html.Div(children='after',
+                                                                                 style={'font-family': font, 'font-size': 'xx-small', 'padding': '10% 0% 0%', 'text-align': 'center', 'font-weight': 'bold'})),
+                                                                html.Div(
+                                                                    [
+                                                                        html.Div(children=str(end_bgs[i]), id={'type': 'sgv_after', 'index': i},
+                                                                                 style={'font-family': font, 'font-size': 'small', 'font-weight': 'bold',
+                                                                                        'display': 'inline-block', }),
+                                                                        html.Div(children='  mg/dL', style={'font-family': font, 'font-size': '20%', 'display': 'inline-block'}),
+                                                                    ],
+                                                                    style={'text-align': 'center', 'padding': '12% 0'}
+                                                                ),
+                                                            ],
+                                                            style={'height': '7rem', 'width': '7rem', 'margin': '0 2% 0 0'},
+                                                            color=colors_heatmap[list(np.array(targets_heatmap) > end_bgs[i]).index(True) - 1],
+                                                            className='image-border-bottom',
+                                                            id={'type': 'card_sgv_after', 'index': i}
+                                                        ),
+                                                        dbc.Card(
+                                                            [
+                                                                dbc.Row(html.Div(children='meal size',
+                                                                                 style={'font-family': font, 'font-size': 'xx-small', 'padding': '20% 0% 0%', 'text-align': 'center', 'font-weight': 'bold'})),
+                                                                html.Div(
+                                                                    [
+                                                                        html.Div(children=str(round(carbs_sums[i])), id={'type': 'meal_size', 'index': i},
+                                                                                 style={'font-family': font, 'font-size': 'small', 'font-weight': 'bold',
+                                                                                        'display': 'inline-block', }),
+                                                                        html.Div(children='  g', style={'font-family': font, 'font-size': '20%', 'display': 'inline-block'}),
+                                                                    ],
+                                                                    style={'text-align': 'center', 'padding': '12% 0'}
+                                                                ),
+                                                            ],
+                                                            style={'height': '9rem', 'width': '7rem', 'position': 'relative', 'top': '-2rem'},
+                                                            className='image-border',
+                                                            color=colors['carbs'][:-2] + str(min((carbs_sums[i] - 20) / 90, 1)) + ')',
+                                                            id={'type': 'card_meal_size', 'index': i}
+                                                        ),
+
+                                                        dbc.Card(
+                                                            [
+                                                                dbc.Row(html.Div(children='bolus',
+                                                                                 style={'font-family': font, 'font-size': 'xx-small', 'padding': '20% 0% 0%', 'text-align': 'center', 'font-weight': 'bold'})),
+                                                                html.Div(
+                                                                    [
+                                                                        html.Div(children=str(round(bolus_sums[i], 1)), id={'type': 'bolus', 'index': i},
+                                                                                 style={'font-family': font, 'font-size': 'small', 'font-weight': 'bold', 'display': 'inline-block', }),
+                                                                        html.Div(children='  U', style={'font-family': font, 'font-size': '20%', 'display': 'inline-block'}),
+                                                                    ],
+                                                                    style={'text-align': 'center', 'padding': '12% 0'}
+                                                                ),
+                                                            ],
+                                                            style={'height': '9rem', 'width': '7rem', 'position': 'relative', 'top': '-2rem'},
+                                                            className='image-border',
+                                                            color=colors['bolus'][:-2] + str(min((bolus_sums[i] - 5) / 14, 1)) + ')',
+                                                            id={'type': 'card_bolus', 'index': i}
+                                                        ),
+                                                    ],
+                                                ),
+                                            ],
+                                            width=4
+                                        )
+                                    ],
+                                    style={'padding': '0%', 'margin': '0%'}
+                                ),
+                            ],
+                            style={'display': 'inline'},
+                            id={'type': 'pattern_card_meals', 'index': i}
+                        )
+                        for i in range(0, n_clusters_)
+                    ]
+                    +
+                    ################################################################################
+                    # HIDDEN PATTERN DIVS
+                    ################################################################################
+                    [
+                        html.Div(
+                            [
+                                ################################################################################
+                                # PATTERN HEADING
+                                ################################################################################
+                                dbc.Row(
+                                    [
+                                        dbc.Col(
+                                            html.Div('Pattern {}'.format(i + 1), style={'font-family': font, 'font-size': 'small', 'padding': '10% 0% 0% 10%', 'font-weight': 'bold'}),
+                                            width=2
+                                        ),
+                                    ]
+                                ),
+                                ################################################################################
+                                # PATTERN CONTENT
+                                ################################################################################
+                                dbc.Row(
+                                    [
+                                        ################################################################################
+                                        # PATTERN GRAPH
+                                        ################################################################################
+                                        dbc.Col(
+                                            [
+                                                dcc.Graph(
+                                                    figure={},
+                                                    id='meal_insights_overview_graph_{}'.format(i),
+                                                    config={
+                                                        'displayModeBar': False
+                                                    }
+                                                ),
+                                            ],
+                                        ),
+                                        ################################################################################
+                                        # PATTERN STATISTICS
+                                        ################################################################################
+                                        dbc.Col(
+                                            [
+                                                ################################################################################
+                                                # BAR CHART
+                                                ################################################################################
+                                                dbc.Row(
+                                                    dcc.Graph(
+                                                        figure={},
+                                                        id='meal_insights_bar_graph_{}'.format(i),
+                                                        config={
+                                                            'displayModeBar': False
+                                                        }
+                                                    ),
+                                                    style={'padding': '0 0 5%'}
+                                                ),
+                                                ################################################################################
+                                                #  PATTERN STATISTIC CARDS
+                                                ################################################################################
+                                                dbc.Row(
+                                                    [
+                                                        dbc.Card(
+                                                            [
+                                                                dbc.Row(html.Div(children='before',
+                                                                                 style={'font-family': font, 'font-size': 'xx-small', 'padding': '10% 0% 0%', 'text-align': 'center', 'font-weight': 'bold'})),
+                                                                html.Div(
+                                                                    [
+                                                                        html.Div(children='', id={'type': 'sgv_before', 'index': i}, style={'font-family': font, 'font-size': 'small', 'font-weight': 'bold',
+                                                                                                                                            'display': 'inline-block', }),
+                                                                        html.Div(children='  mg/dL', style={'font-family': font, 'font-size': '20%', 'display': 'inline-block'}),
+                                                                    ],
+                                                                    style={'text-align': 'center', 'padding': '12% 0'}
+                                                                ),
+                                                            ],
+                                                            style={'height': '7rem', 'width': '7rem', 'margin': '0 2% 0 0'},
+                                                            className='image-border-top',
+                                                            color='w',
+                                                            id={'type': 'card_sgv_before', 'index': i}
+                                                        ),
+                                                        dbc.Card(
+                                                            [
+                                                                dbc.Row(html.Div(children='prebolus',
+                                                                                 style={'font-family': font, 'font-size': 'xx-small', 'padding': '3% 0% 0%', 'text-align': 'center', 'font-weight': 'bold'})),
+                                                                html.Div(
+                                                                    [
+                                                                        html.Div(children='', id={'type': 'interval', 'index': i}, style={'font-family': font, 'font-size': 'small', 'font-weight': 'bold',
+                                                                                                                                          'display': 'inline-block', }),
+                                                                        html.Div(children='  min', style={'font-family': font, 'font-size': '20%', 'display': 'inline-block'}),
+                                                                    ],
+                                                                    style={'text-align': 'center', 'padding': '0% 0'}
+                                                                ),
+                                                            ],
+                                                            style={'height': '4rem', 'width': '7rem', 'margin': '0 0 0 0'},
+                                                            className='image-border-left',
+                                                            color='w',
+                                                            id={'type': 'card_interval', 'index': i}
+                                                        ),
+                                                        dbc.Card(
+                                                            [
+                                                                dbc.Row(html.Div(children='factor',
+                                                                                 style={'font-family': font, 'font-size': 'xx-small', 'padding': '3% 0% 0%', 'text-align': 'center', 'font-weight': 'bold'})),
+                                                                html.Div(
+                                                                    [
+                                                                        html.Div(children='', id={'type': 'factor', 'index': i}, style={'font-family': font, 'font-size': 'small',
+                                                                                                                                        'font-weight': 'bold',
+                                                                                                                                        'display': 'inline-block', }),
+                                                                        html.Div(children='  g/U', style={'font-family': font, 'font-size': '20%', 'display': 'inline-block'}),
+                                                                    ],
+                                                                    style={'text-align': 'center', 'padding': '0% 0'}
+                                                                ),
+                                                            ],
+                                                            style={'height': '4rem', 'width': '7rem', 'margin': '0 0 0 0'},
+                                                            className='image-border-right',
+                                                            color='w',
+                                                            id={'type': 'card_factor', 'index': i}
+                                                        ),
+                                                    ],
+                                                ),
+                                                dbc.Row(
+                                                    [
+                                                        dbc.Card(
+                                                            [
+                                                                dbc.Row(html.Div(children='after',
+                                                                                 style={'font-family': font, 'font-size': 'xx-small', 'padding': '10% 0% 0%', 'text-align': 'center', 'font-weight': 'bold'})),
+                                                                html.Div(
+                                                                    [
+                                                                        html.Div(children='', id={'type': 'sgv_after', 'index': i}, style={'font-family': font, 'font-size': 'small', 'font-weight': 'bold',
+                                                                                                                                           'display': 'inline-block', }),
+                                                                        html.Div(children='  mg/dL', style={'font-family': font, 'font-size': '20%', 'display': 'inline-block'}),
+                                                                    ],
+                                                                    style={'text-align': 'center', 'padding': '12% 0'}
+                                                                ),
+                                                            ],
+                                                            style={'height': '7rem', 'width': '7rem', 'margin': '0 2% 0 0'},
+                                                            color='w',
+                                                            className='image-border-bottom',
+                                                            id={'type': 'card_sgv_after', 'index': i}
+                                                        ),
+                                                        dbc.Card(
+                                                            [
+                                                                dbc.Row(html.Div(children='meal size',
+                                                                                 style={'font-family': font, 'font-size': 'xx-small', 'padding': '20% 0% 0%', 'text-align': 'center', 'font-weight': 'bold'})),
+                                                                html.Div(
+                                                                    [
+                                                                        html.Div(children='', id={'type': 'meal_size', 'index': i}, style={'font-family': font, 'font-size': 'small', 'font-weight': 'bold',
+                                                                                                                                           'display': 'inline-block', }),
+                                                                        html.Div(children='  g', style={'font-family': font, 'font-size': '20%', 'display': 'inline-block'}),
+                                                                    ],
+                                                                    style={'text-align': 'center', 'padding': '12% 0'}
+                                                                ),
+                                                            ],
+                                                            style={'height': '9rem', 'width': '7rem', 'position': 'relative', 'top': '-2rem'},
+                                                            className='image-border',
+                                                            color='w',
+                                                            id={'type': 'card_meal_size', 'index': i}
+                                                        ),
+
+                                                        dbc.Card(
+                                                            [
+                                                                dbc.Row(html.Div(children='bolus',
+                                                                                 style={'font-family': font, 'font-size': 'xx-small', 'padding': '20% 0% 0%', 'text-align': 'center', 'font-weight': 'bold'})),
+                                                                html.Div(
+                                                                    [
+                                                                        html.Div(children='', id={'type': 'bolus', 'index': i},
+                                                                                 style={'font-family': font, 'font-size': 'small', 'font-weight': 'bold', 'display': 'inline-block', }),
+                                                                        html.Div(children='  U', style={'font-family': font, 'font-size': '20%', 'display': 'inline-block'}),
+                                                                    ],
+                                                                    style={'text-align': 'center', 'padding': '12% 0'}
+                                                                ),
+                                                            ],
+                                                            style={'height': '9rem', 'width': '7rem', 'position': 'relative', 'top': '-2rem'},
+                                                            className='image-border',
+                                                            color='w',
+                                                            id={'type': 'card_bolus', 'index': i}
+                                                        ),
+                                                    ],
+                                                ),
+                                            ],
+                                            width=4
+                                        )
+                                    ],
+                                    style={'padding': '0%', 'margin': '0%'}
+                                ),
+                            ],
+                            style={'display': 'none'},
+                            id={'type': 'pattern_card_meals', 'index': i}
+                        )
+                        for i in range(n_clusters_, num_insight_patterns)
+                    ], width=9),
+
+                ################################################################################
+                # FILTER SIDEBAR
+                ################################################################################
+                dbc.Col(
+                    html.Div(
+                        [
+                            ################################################################################
+                            # SIDEBAR TITLE
+                            ################################################################################
+                            html.Div('FILTER', style={'font-family': font, 'font-size': 'small', 'padding': '0% 0% 0% 0%', 'font-weight': 'bold'}),
+
+                            ################################################################################
+                            # PATTERN GRAPHS OVERLAYED
+                            ################################################################################
+                            dbc.Row(
+                                dcc.Graph(
+                                    figure=graphs_all_curves,
+                                    id='graph_all_curves',
+                                    config={
+                                        'displayModeBar': False
+                                    }
+                                ),
+                            ),
+                            html.Div(style={'padding': '0% 0 10%'}),
+
+                            ################################################################################
+                            # FILTER CHECKLIST TIME OF DAY
+                            ################################################################################
+                            html.Div(
+                                [
+                                    dbc.Label("Time of day", style={'font-weight': 'bold'}),
+                                    dbc.Checklist(
+                                        options=[
+                                            {"label": "Morning", "value": 1},
+                                            {"label": "Noon", "value": 2},
+                                            {"label": "Evening", "value": 3},
+                                            {"label": "Night", "value": 4},
+                                        ],
+                                        value=[1, 2, 3, 4],
+                                        id="checklist-input-meals",
+                                    ),
+                                ]
+                            ),
+
+                            ################################################################################
+                            # FILTER SLIDER MEAL SIZE
+                            ################################################################################
+                            dbc.Label("Meal size", style={'padding': '10% 0 0', 'font-weight': 'bold'}, html_for="range-slider-meal-size"),
+                            dcc.RangeSlider(id="range-slider-meal-size",
+                                            min=40,
+                                            max=150,
+                                            step=10,
+                                            marks={
+                                                0: '0 g',
+                                                25: '25 g',
+                                                50: '50 g',
+                                                75: '75 g',
+                                                100: '100 g',
+                                                125: '125 g',
+                                                150: '150 g',
+                                            },
+                                            value=[0, 150],
+                                            tooltip={"placement": "bottom", "always_visible": True},
+                                            ),
+                            html.Div(style={'padding': '0% 0 10%'}),
+
+                            ################################################################################
+                            # APPLY BUTTON
+                            ################################################################################
+                            dbc.Button("Apply",
+                                       id='meal_filter_apply_btn',
+                                       color="secondary",
+                                       className="me-1",
+                                       n_clicks=0,
+                                       disabled=True,
+                                       ),
+                        ],
+                        style=SIDEBAR_STYLE,
+                    ), width=3, class_name='xs-hide')
+            ]
+        ), label="Meals"
+    ),
+        # dbc.Tab(hypo_overview, label="Hypos"),
+    ]
+)

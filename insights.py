@@ -758,7 +758,6 @@ def get_insight_data_hypos(filter_time_of_day=None, filter_meal_size=None):
     logs_indices = get_logs_from_indices(indices)
 
     for i in range(n_clusters_):
-        # dataset_cluster = dataset[clusters == i + 1]
         hypo_starts_cluster = hypo_starts.iloc[clusters == i + 1].tolist()
         dataset_cluster = [j for (j, v) in zip(logs_indices['sgv'], clusters == i + 1) if v]
         dataset_cluster_carbs = [j for (j, v) in zip(logs_indices['carbs'], clusters == i + 1) if v]
@@ -830,8 +829,6 @@ def get_curve_overview_plot(dataset, dataset_unfiltered):
         plot_bgcolor=colors['background'],
         paper_bgcolor=colors['background'],
         yaxis=dict(
-            # title='<b>Glucose</b>',
-            # title_font_size=12,
             tickfont=dict(size=8)
         ),
         xaxis=dict(
