@@ -1289,7 +1289,6 @@ layout_overview = html.Div(
 ################################################################################
 
 n_clusters_, most_occurring, graphs_meal_overview, graphs_all_curves, graphs_insights_meals, start_bgs, time_between, carbs_sums, end_bgs, bolus_sums = get_insight_data_meals()
-
 styles = [{'display': 'inline'}] * n_clusters_ + [{'display': 'none'}] * (num_insight_patterns - n_clusters_)
 
 layout_insights = dbc.Tabs(

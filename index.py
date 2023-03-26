@@ -4,7 +4,9 @@ import numpy as np
 from dash import dcc, html, ctx
 
 from aggregations import draw_seasonal_graph_day, draw_full_agp
+from colors import colors_heatmap, colors, targets_heatmap, get_prebolus_button_color
 from daily import draw_daily_plot
+from insights import get_time_of_day_from_number, get_logs_meals, get_dataset, filter_function_time_of_day, filter_function_meal_size, get_curve_overview_plot, get_insight_data_meals
 from layout import app, layout_daily, layout_agp, layout_overview, layout_insights
 from dash_extensions.enrich import Output, DashProxy, Input, MultiplexerTransform, State, callback_context, ALL
 
@@ -12,7 +14,7 @@ from overview import draw_horizon_graph, get_daily_data, get_x_range_for_day, dr
 from statistics import get_tir_plot, get_statistics_day, get_statistics_days
 from helpers import convert_datestring, get_df_between_dates, get_tir, get_statistics, check_timebox, get_log_indices, calculate_tir_time, get_df_of_date, get_mean_per_day
 from preprocessing import dates, logs_sgv, date_max, date_min, start_date, end_date, sgv_array_for_agp, date_dict, logs_carbs, logs_insulin, logs_br_default, start_date_insights
-from variables import num_horizon_graphs
+from variables import num_horizon_graphs, num_insight_patterns, time_before_meal, time_after_meal
 import re
 
 
@@ -486,6 +488,73 @@ def overview_weekday_buttons(*args):
            overview_agp_graph, \
            *styles, \
            *state
+
+
+################################################################################
+# CALLBACKS INSIGHTS
+################################################################################
+
+@app.callback(
+    Input('meal_filter_apply_btn', 'n_clicks'),
+    Input("checklist-input-meals", 'value'),
+    Input('range-slider-meal-size', 'value'),
+    Output('graph_all_curves', 'figure'),
+    Output('meal_filter_apply_btn', 'disabled'),
+    *[Output('meal_insights_bar_graph_{}'.format(i), 'figure') for i in range(num_insight_patterns)],
+    *[Output('meal_insights_overview_graph_{}'.format(i), 'figure') for i in range(num_insight_patterns)],
+    Output({'type': 'sgv_before', 'index': ALL}, 'children'),
+    Output({'type': 'sgv_after', 'index': ALL}, 'children'),
+    Output({'type': 'interval', 'index': ALL}, 'children'),
+    Output({'type': 'meal_size', 'index': ALL}, 'children'),
+    Output({'type': 'bolus', 'index': ALL}, 'children'),
+    Output({'type': 'factor', 'index': ALL}, 'children'),
+    Output({'type': 'card_sgv_before', 'index': ALL}, 'color'),
+    Output({'type': 'card_sgv_after', 'index': ALL}, 'color'),
+    Output({'type': 'card_interval', 'index': ALL}, 'color'),
+    Output({'type': 'card_meal_size', 'index': ALL}, 'color'),
+    Output({'type': 'card_bolus', 'index': ALL}, 'color'),
+    Output({'type': 'card_factor', 'index': ALL}, 'color'),
+    Output({'type': 'pattern_card_meals', 'index': ALL}, 'style'),
+    # Output('n_patterns_meals', 'children')
+)
+def update_insights_meals(n_clicks, time_of_day_filter, meal_size_filter):
+    time_of_day_filter = get_time_of_day_from_number(time_of_day_filter)
+    triggered_id = ctx.triggered_id
+
+    if triggered_id == 'meal_filter_apply_btn':
+        n_clusters_, most_occurring, graphs_meal_overview, graphs_all_curves, graphs_insights_meals, start_bgs, time_between, carbs_sums, end_bgs, bolus_sums = get_insight_data_meals(
+            filter_time_of_day=time_of_day_filter,
+            filter_meal_size=meal_size_filter)
+
+        colors_rest = [dash.no_update] * (num_insight_patterns - n_clusters_)
+        color_sgv_before = [colors_heatmap[list(np.array(targets_heatmap) > bg).index(True) - 1] for bg in start_bgs]
+        color_sgv_after = [colors_heatmap[list(np.array(targets_heatmap) > bg).index(True) - 1] for bg in end_bgs]
+        color_time_between = [get_prebolus_button_color(item) for item in time_between]
+        color_meal_size = [colors['carbs'][:-2] + str(min((item - 20) / 90, 1)) + ')' for item in carbs_sums]
+        color_bolus = [colors['bolus'][:-2] + str(min((item - 5) / 14, 1)) + ')' for item in bolus_sums]
+        color_factor = ['rgba(157, 164, 169,' + str(min((carbs / bolus) / 10, 1)) + ')' for carbs, bolus in zip(carbs_sums, bolus_sums)]
+
+        carbs_sum = [str(round(c)) for c in carbs_sums]
+        bolus_sum = [str(round(b, 1)) for b in bolus_sums]
+        factors = [str(round(c / b)) for c, b in zip(carbs_sums, bolus_sums)]
+
+        styles = [{'display': 'inline'}] * n_clusters_ + [{'display': 'none'}] * (num_insight_patterns - n_clusters_)
+
+        n_patterns_text = '{} patterns were found.'.format(n_clusters_)
+        print(n_patterns_text)
+        return dash.no_update, True, *graphs_meal_overview, *graphs_insights_meals, start_bgs, end_bgs, time_between, carbs_sum, bolus_sum, factors, color_sgv_before, color_sgv_after, color_time_between, \
+               color_meal_size, color_bolus, color_factor, styles
+    else:
+        logs_meals = get_logs_meals(start_date_insights, end_date, time_before_meal, time_after_meal)
+        dataset_unfiltered, _ = get_dataset(logs_meals)
+        logs_meals = filter_function_time_of_day(logs_meals, time_of_day_filter)
+        logs_meals = filter_function_meal_size(logs_meals, meal_size_filter)
+
+        dataset_clusters, _ = get_dataset(logs_meals)
+        figure = get_curve_overview_plot(dataset_clusters, dataset_unfiltered)
+
+        no_update = [dash.no_update] * num_insight_patterns
+        return figure, False, *no_update, *no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update
 
 
 if __name__ == '__main__':
