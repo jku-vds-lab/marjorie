@@ -1,0 +1,8 @@
+version: '3.0'
+services:
+  save-json:
+    build: .
+    ports:
+      - '8050:8050'
+    volumes:
+    - ./:/marjorie
