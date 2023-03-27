@@ -826,7 +826,7 @@ def get_curve_overview_plot(dataset, dataset_unfiltered):
                 x=x,
                 y=data,
                 mode='lines',
-                line=dict(color='#5c636a')
+                line=dict(color='rgba(92, 99, 106, 0.3)')
             )
         )
 
