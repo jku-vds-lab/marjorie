@@ -41,8 +41,9 @@ app.layout = html.Div([
             ################################################################################
             html.Div(
                 [
-                    html.H2("", className="display-4"),
-                    html.Hr(),
+                    html.Img(src=app.get_asset_url('marjorie-logo.svg'), style={'width': '100%'}),
+                    html.Img(src=app.get_asset_url('marjorie-text.svg'), style={'width': '100%', 'margin-top': '1rem'}),
+                    html.Hr(style={'border-color': '#5c636a', 'margin': '1rem 0'}),
                     dbc.Nav(
                         [
                             dbc.NavLink("Summary", href="/agp", active="exact"),
