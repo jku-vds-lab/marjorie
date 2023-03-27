@@ -1527,6 +1527,10 @@ layout_insights = dbc.Tabs(
                                             {"label": "Night (0:00 - 6:00)", "value": 4},
                                         ],
                                         value=[1, 2, 3, 4],
+                                        input_checked_style={
+                                            "backgroundColor": "#6c6c6c",
+                                            "borderColor": "#6c6c6c",
+                                        },
                                         id="checklist-input-meals",
                                     ),
                                 ]
