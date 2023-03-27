@@ -26,7 +26,7 @@ def render_page_content(pathname):
         return layout_daily
     elif pathname == "/insights":
         return layout_insights
-    return None
+    return layout_agp
 
 
 ################################################################################
