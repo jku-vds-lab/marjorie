@@ -1,0 +1,9 @@
+dash
+dash_bootstrap_components
+dash-extensions
+numpy
+pandas
+scipy
+tslearn
+dtaidistance
+h5py
