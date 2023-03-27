@@ -19,7 +19,7 @@ from assets.styles import *
 import re
 from datetime import datetime, timedelta
 import warnings
-from pandas.core.common import SettingWithCopyWarning
+from pandas.errors import SettingWithCopyWarning
 
 warnings.simplefilter(action="ignore", category=SettingWithCopyWarning)
 
