@@ -22,8 +22,8 @@ n_filters = 10
 font = 'Verdana, sans-serif'
 
 
-morning = {n: 'morning' for n in range(5, 11)}
-noon = {n: 'noon' for n in range(11, 17)}
-evening = {n: 'evening' for n in range(17, 22)}
-night = {n: 'night' for n in range(0, 5)}
+morning = {n: 'morning' for n in range(6, 11)}
+noon = {n: 'noon' for n in range(11, 16)}
+evening = {n: 'evening' for n in range(16, 24)}
+night = {n: 'night' for n in range(0, 6)}
 times_of_day = {**morning, **noon, **evening, **night}

@@ -111,7 +111,6 @@ def calculate_stats(logs, log_type, group, seasonal=True):
 
 
 def add_placeholder_dates(logs, log_type):
-
     extra_rows = pd.DataFrame({
         'timestamp': days,
         log_type: [np.nan] * len(days)
@@ -186,7 +185,7 @@ def draw_carb_insulin_bars(group, carbs_logs, insulin_logs):
     figures = []
     factor = [1, 10]
     for i, logs in enumerate([carb_logs, insulin_logs]):
-        figures.append(go.Bar(name=names[i], x=logs[group], y=logs[('sum', 'mean')] * factor[i], offset=i*0.2-0.2, marker_color=colors[names[i]], width=0.2))
+        figures.append(go.Bar(name=names[i], x=logs[group], y=logs[('sum', 'mean')] * factor[i], offset=i * 0.2 - 0.2, marker_color=colors[names[i]], width=0.2))
     return figures
 
 
@@ -236,6 +235,7 @@ def draw_seasonal_graph(group, d_start, d_end):
         fig.add_trace(f, row=2, col=1)
 
     return fig
+
 
 def draw_agp_carbs_bolus():
     fig = make_subplots(rows=2, cols=1, shared_xaxes=True, subplot_titles=('<b>Carbs</b> g', '<b>Bolus</b> U'))
@@ -323,19 +323,21 @@ def draw_full_agp(start_date, end_date, weekday_filter=None):
 
     fig_agp = draw_barcode_plot(fig_agp, get_df_between_dates(logs_carbs, start_date, end_date, weekday_filter), 'carbs', row=2, spacing=0.08)
     fig_agp = draw_barcode_plot(fig_agp, get_df_between_dates(logs_insulin, start_date, end_date, weekday_filter), 'bolus', row=4, spacing=0.08)
-    x_values = [0.5, 3, 6, 9, 12, 15, 18, 21, 24]
-    x_labels = ['0 am', '3 am', '6 am', '9 am', '12 am', '3 pm', '6 pm', '9 pm', '0 pm']
+    x_values = [0, 3, 6, 9, 12, 15, 18, 21, 24]
+    x_labels = ['0:00', '3:00', '6:00', '9:00', '12:00', '15:00', '18:00', '21:00', '24:00']
+    # x_labels = ['0 am', '3 am', '6 am', '9 am', '12 am', '3 pm', '6 pm', '9 pm', '0 pm']
     fig_agp.update_layout(
         yaxis_range=[30, 300],
         showlegend=False,
         width=620,
         height=400,
-        xaxis1=dict(
+        xaxis4=dict(
+            tickmode='array',
             tickvals=x_values,
-            showgrid=True,
             ticktext=x_labels,
+            showgrid=True,
             range=[0, 24],
-            visible=False
+            # visible=False
         ),
         yaxis4=dict(
             showticklabels=False,
@@ -367,7 +369,7 @@ def draw_full_agp(start_date, end_date, weekday_filter=None):
         margin=dict(t=30, b=5, l=0, r=10),
         plot_bgcolor=colors['background'],
     )
-    fig_agp.update_layout(dragmode="select", clickmode='event+select')
+    # fig_agp.update_layout(dragmode="select", clickmode='event+select')
     fig_agp.layout.annotations[0].update(x=0.06, font=dict(family=font, size=10))
     fig_agp.layout.annotations[1].update(x=0.03, font=dict(family=font, size=10))
     fig_agp.layout.annotations[2].update(x=0.03, font=dict(family=font, size=10))
@@ -379,7 +381,7 @@ def agp_xaxis(width=590, margin_left=10):
     fig_agp = draw_agp(fig_agp, calculate_agp(get_df_between_dates(logs_sgv, start_date, end_date), 'sgv'), row=1)
 
     x_values = [0.5, 3, 6, 9, 12, 15, 18, 21, 24]
-    x_labels = ['0 am', '3 am', '6 am', '9 am', '12 am', '3 pm', '6 pm', '9 pm', '0 pm']
+    x_labels = ['0:00', '3:00', '6:00', '9:00', '12:00', '15:00', '18:00', '21:00', '24:00']
     fig_agp.update_layout(
         showlegend=False,
         width=width,
@@ -427,7 +429,7 @@ def draw_barcode_plot(fig, logs, log_type, row, spacing=0.25):
             ),
             row=row, col=1,
         )
-    fig.update_layout(plot_bgcolor=colors['background'])
+    # fig.update_layout(plot_bgcolor=colors['background'])
     return fig
 
 

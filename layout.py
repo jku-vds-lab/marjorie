@@ -481,7 +481,6 @@ layout_agp = html.Div(
                             dbc.Card(
                                 children=
                                 [
-                                    # dbc.CardHeader('AGP'),
                                     dbc.CardBody(
                                         dcc.Graph(
                                             id='agp_graph',
@@ -496,12 +495,6 @@ layout_agp = html.Div(
                                 style={'padding': '0 2em'}
                             ),
                             style={'margin': '2rem 0rem'}
-                        ),
-                        html.Div(
-                            children=dcc.Graph(
-                                figure=agp_xaxis(width=620, margin_left=5)
-                            ),
-                            style={'position': 'relative', 'top': '-2.5em', 'left': '-0.5em', 'padding': '0rem 0rem 0rem 60px'}
                         ),
                         dbc.Button('Explore days in detail', id='agp_explore_button', n_clicks=0, outline=True, color='secondary')
                     ],
@@ -1526,10 +1519,10 @@ layout_insights = dbc.Tabs(
                                     dbc.Label("Time of day", style={'font-weight': 'bold'}),
                                     dbc.Checklist(
                                         options=[
-                                            {"label": "Morning", "value": 1},
-                                            {"label": "Noon", "value": 2},
-                                            {"label": "Evening", "value": 3},
-                                            {"label": "Night", "value": 4},
+                                            {"label": "Morning (6:00 - 11:00)", "value": 1},
+                                            {"label": "Noon (11:00 - 16:00)", "value": 2},
+                                            {"label": "Evening (16:00 - 24:00)", "value": 3},
+                                            {"label": "Night (0:00 - 6:00)", "value": 4},
                                         ],
                                         value=[1, 2, 3, 4],
                                         id="checklist-input-meals",
