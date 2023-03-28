@@ -26,7 +26,7 @@ def render_page_content(pathname):
         return layout_daily
     elif pathname == "/insights":
         return layout_insights
-    return None
+    return layout_agp
 
 
 ################################################################################
@@ -558,4 +558,4 @@ def update_insights_meals(n_clicks, time_of_day_filter, meal_size_filter):
 
 
 if __name__ == '__main__':
-    app.run_server(debug=False)
+    app.run_server(host='0.0.0.0', port=8050, debug=False)
