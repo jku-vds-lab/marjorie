@@ -1285,11 +1285,15 @@ layout_overview = html.Div(
 
 meals_n_clusters_, meals_bar_graphs, meals_graph_all_curves, meals_graphs_insights, meals_start_bgs, meals_time_between, meals_carbs_sums, meals_end_bgs, meals_bolus_sums = get_insight_data_meals()
 meals_styles = [{'display': 'inline'}] * meals_n_clusters_ + [{'display': 'none'}] * (num_insight_patterns - meals_n_clusters_)
-# hypos_n_clusters_, hypos_graphs_overview, hypos_graph_all_curves, hypos_graphs_insights, hypos_start_bgs, hypos_time_between, hypos_carbs_sums, hypos_end_bgs, hypos_bolus_sums = get_insight_data_hypos()
-# hypos_styles = [{'display': 'inline'}] * hypos_n_clusters_ + [{'display': 'none'}] * (num_insight_patterns - hypos_n_clusters_)
+hypos_n_clusters_, hypos_bar_graphs, hypos_graph_all_curves, hypos_graphs_insights, hypos_start_bgs, hypos_end_bgs, hypos_carb_avg_before, hypos_carb_avg_after, hypos_bolus_avg_before, \
+hypos_bolus_avg_after = get_insight_data_hypos()
+hypos_styles = [{'display': 'inline'}] * hypos_n_clusters_ + [{'display': 'none'}] * (num_insight_patterns - hypos_n_clusters_)
 
 layout_insights = dbc.Tabs(
     [dbc.Tab(
+        ################################################################################
+        # MEAL INSIGHTS
+        ################################################################################
         dbc.Row(
             [
                 ################################################################################
@@ -1574,14 +1578,308 @@ layout_insights = dbc.Tabs(
                         style=SIDEBAR_STYLE,
                     ), width=3)
             ]
-        ), label="Meals"
+        ), label="Meals", labelClassName='text-dark', activeTabClassName="fw-bold"
     ),
-        # dbc.Tab(
-        #     dbc.Row(
-        #         [
-        #             ''
-        #         ]
-        #     )
-        #     , label="Hypos"),
+        dbc.Tab(
+            ################################################################################
+            # HYPO INSIGHTS
+            ################################################################################
+            dbc.Row(
+                [
+                    ################################################################################
+                    # HYPO INSIGHTS: PATTERN SCREEN
+                    ################################################################################
+                    dbc.Col(
+                        ################################################################################
+                        # HYPO INSIGHTS: DISPLAYED PATTERN DIVS
+                        ################################################################################
+                        [
+                            # html.Div(children='{} patterns were found.'.format(n_clusters_), id='n_patterns_meals', style={'font-family': font, 'font-size': 'medium', 'padding': '1% 0% 2% 2%'}),
+                            html.Div(
+                                [
+                                    ################################################################################
+                                    # HYPO INSIGHTS: PATTERN HEADING
+                                    ################################################################################
+                                    dbc.Row(
+                                        [
+                                            dbc.Col(
+                                                html.Div('Pattern {}'.format(i + 1), style={'font-family': font, 'font-size': 'small', 'padding': '10% 0% 0% 10%', 'font-weight': 'bold'}),
+                                                width=2
+                                            ),
+                                        ]
+                                    ),
+                                    ################################################################################
+                                    # HYPO INSIGHTS: PATTERN CONTENT
+                                    ################################################################################
+                                    dbc.Row(
+                                        [
+                                            ################################################################################
+                                            # HYPO INSIGHTS: PATTERN GRAPH
+                                            ################################################################################
+                                            dbc.Col(
+                                                [
+                                                    dcc.Graph(
+                                                        figure=hypos_graphs_insights[i],
+                                                        id='insights_hypos_overview_graph_{}'.format(i),
+                                                        config={
+                                                            'displayModeBar': False
+                                                        }
+                                                    ),
+                                                ],
+                                            ),
+                                            ################################################################################
+                                            # HYPO INSIGHTS: PATTERN STATISTICS
+                                            ################################################################################
+                                            dbc.Col(
+                                                [
+                                                    ################################################################################
+                                                    # HYPO INSIGHTS: BAR CHART
+                                                    ################################################################################
+                                                    dbc.Row(
+                                                        dcc.Graph(
+                                                            figure=hypos_bar_graphs[i],
+                                                            id='insights_hypos_bar_graph_{}'.format(i),
+                                                            config={
+                                                                'displayModeBar': False
+                                                            }
+                                                        ),
+                                                        style={'padding': '0 0 5%'}
+                                                    ),
+                                                    # dbc.Row(html.Div('Mostly occurring at {}'.format(most_occurring[i]))),
+                                                    ################################################################################
+                                                    # HYPO INSIGHTS: STATISTIC CARDS
+                                                    ################################################################################
+                                                    dbc.Row(
+                                                        [
+                                                            dbc.Card(
+                                                                [
+                                                                    dbc.Row(html.Div(children='before hypo',
+                                                                                     style={'font-family': font, 'font-size': 'xx-small', 'padding': '10% 0% 0%', 'text-align': 'center', 'font-weight': 'bold'})),
+                                                                    html.Div(
+                                                                        [
+                                                                            html.Div(children=str(hypos_start_bgs[i]), id={'type': 'insights_hypos_sgv_before', 'index': i},
+                                                                                     style={'font-family': font, 'font-size': 'small', 'font-weight': 'bold',
+                                                                                            'display': 'inline-block', }),
+                                                                            html.Div(children='  mg/dL', style={'font-family': font, 'font-size': '20%', 'display': 'inline-block'}),
+                                                                        ],
+                                                                        style={'text-align': 'center', 'padding': '12% 0'}
+                                                                    ),
+                                                                ],
+                                                                style={'height': '7rem', 'width': '7rem', 'margin': '0 2% 0 0'},
+                                                                className='image-border-top',
+                                                                color=colors_heatmap[list(np.array(targets_heatmap) > hypos_start_bgs[i]).index(True) - 1],
+                                                                id={'type': 'insights_hypos_card_sgv_before', 'index': i}
+                                                            ),
+                                                            dbc.Card(
+                                                                [
+                                                                    dbc.Row(html.Div(children='before hypo',
+                                                                                     style={'font-family': font, 'font-size': 'xx-small', 'padding': '10% 0% 0%', 'text-align': 'center', 'font-weight': 'bold'})),
+                                                                    dbc.Row(html.Div(children='meal size',
+                                                                                     style={'font-family': font, 'font-size': 'xx-small', 'padding': '0% 0% 0%', 'text-align': 'center', 'font-weight': 'bold'})),
+                                                                    html.Div(
+                                                                        [
+                                                                            html.Div(children=str(round(hypos_carb_avg_before[i])), id={'type': 'insights_hypos_carb_avg_before', 'index': i},
+                                                                                     style={'font-family': font, 'font-size': 'small', 'font-weight': 'bold',
+                                                                                            'display': 'inline-block', }),
+                                                                            html.Div(children='  g', style={'font-family': font, 'font-size': '20%', 'display': 'inline-block'}),
+                                                                        ],
+                                                                        style={'text-align': 'center', 'padding': '0% 0'}
+                                                                    ),
+                                                                ],
+                                                                style={'height': '7rem', 'width': '7rem', 'margin': '0 2% 0 0', 'position': 'relative', 'top': '0rem'},
+                                                                className='image-border-top',
+                                                                color=colors['carbs'][:-2] + str(min((hypos_carb_avg_before[i]) / 60, 1)) + ')',
+                                                                id={'type': 'insights_hypos_card_carb_avg_before', 'index': i}
+                                                            ),
+                                                            dbc.Card(
+                                                                [
+                                                                    dbc.Row(html.Div(children='before hypo',
+                                                                                     style={'font-family': font, 'font-size': 'xx-small', 'padding': '10% 0% 0%', 'text-align': 'center', 'font-weight': 'bold'})),
+                                                                    dbc.Row(html.Div(children='bolus',
+                                                                                     style={'font-family': font, 'font-size': 'xx-small', 'padding': '0% 0% 0%', 'text-align': 'center', 'font-weight': 'bold'})),
+                                                                    html.Div(
+                                                                        [
+                                                                            html.Div(children=str(round(hypos_bolus_avg_before[i], 1)), id={'type': 'insights_hypos_bolus_avg_before', 'index': i}, style={'font-family':
+                                                                                                                                                                                                               font,
+                                                                                                                                                                                                           'font-size': 'small',
+                                                                                                                                                                                                           'font-weight': 'bold',
+                                                                                                                                                                                                           'display': 'inline-block', }),
+                                                                            html.Div(children='  U', style={'font-family': font, 'font-size': '20%', 'display': 'inline-block'}),
+                                                                        ],
+                                                                        style={'text-align': 'center', 'padding': '0% 0'}
+                                                                    ),
+                                                                ],
+                                                                style={'height': '7rem', 'width': '7rem', 'margin': '0 0 0 0', 'position': 'relative', 'top': '0rem'},
+                                                                className='image-border-top',
+                                                                color=colors['bolus'][:-2] + str(min((hypos_bolus_avg_before[i]) / 8, 1)) + ')',
+                                                                id={'type': 'insights_hypos_card_bolus_avg_before', 'index': i}
+                                                            ),
+                                                        ],
+                                                    ),
+                                                    dbc.Row(
+                                                        [
+                                                            dbc.Card(
+                                                                [
+                                                                    dbc.Row(html.Div(children='after hypo',
+                                                                                     style={'font-family': font, 'font-size': 'xx-small', 'padding': '10% 0% 0%', 'text-align': 'center', 'font-weight': 'bold'})),
+                                                                    html.Div(
+                                                                        [
+                                                                            html.Div(children=str(hypos_end_bgs[i]), id={'type': 'insights_hypos_sgv_after', 'index': i},
+                                                                                     style={'font-family': font, 'font-size': 'small', 'font-weight': 'bold',
+                                                                                            'display': 'inline-block', }),
+                                                                            html.Div(children='  mg/dL', style={'font-family': font, 'font-size': '20%', 'display': 'inline-block'}),
+                                                                        ],
+                                                                        style={'text-align': 'center', 'padding': '12% 0'}
+                                                                    ),
+                                                                ],
+                                                                style={'height': '7rem', 'width': '7rem', 'margin': '0 2% 0 0'},
+                                                                color=colors_heatmap[list(np.array(targets_heatmap) > hypos_end_bgs[i]).index(True) - 1],
+                                                                className='image-border-bottom',
+                                                                id={'type': 'insights_hypos_card_sgv_after', 'index': i}
+                                                            ),
+                                                            dbc.Card(
+                                                                [
+                                                                    dbc.Row(html.Div(children='after hypo',
+                                                                                     style={'font-family': font, 'font-size': 'xx-small', 'padding': '10% 0% 0%', 'text-align': 'center', 'font-weight': 'bold'})),
+                                                                    dbc.Row(html.Div(children='meal size',
+                                                                                     style={'font-family': font, 'font-size': 'xx-small', 'padding': '0% 0% 0%', 'text-align': 'center', 'font-weight': 'bold'})),
+                                                                    html.Div(
+                                                                        [
+                                                                            html.Div(children=str(round(hypos_carb_avg_after[i])), id={'type': 'insights_hypos_carb_avg_after', 'index': i},
+                                                                                     style={'font-family': font, 'font-size': 'small', 'font-weight': 'bold',
+                                                                                            'display': 'inline-block', }),
+                                                                            html.Div(children='  g', style={'font-family': font, 'font-size': '20%', 'display': 'inline-block'}),
+                                                                        ],
+                                                                        style={'text-align': 'center', 'padding': '12% 0'}
+                                                                    ),
+                                                                ],
+                                                                style={'height': '7rem', 'width': '7rem', 'position': 'relative', 'top': '0rem', 'margin': '0 2% 0 0'},
+                                                                className='image-border-bottom',
+                                                                color=colors['carbs'][:-2] + str(min((hypos_carb_avg_after[i]) / 60, 1)) + ')',
+                                                                id={'type': 'insights_hypos_card_carb_avg_after', 'index': i}
+                                                            ),
+
+                                                            dbc.Card(
+                                                                [
+                                                                    dbc.Row(html.Div(children='after hypo',
+                                                                                     style={'font-family': font, 'font-size': 'xx-small', 'padding': '10% 0% 0%', 'text-align': 'center', 'font-weight': 'bold'})),
+                                                                    dbc.Row(html.Div(children='bolus',
+                                                                                     style={'font-family': font, 'font-size': 'xx-small', 'padding': '0% 0% 0%', 'text-align': 'center', 'font-weight': 'bold'})),
+                                                                    html.Div(
+                                                                        [
+                                                                            html.Div(children=str(round(hypos_bolus_avg_after[i], 1)), id={'type': 'insights_hypos_bolus_avg_after', 'index': i},
+                                                                                     style={'font-family': font, 'font-size': 'small', 'font-weight': 'bold', 'display': 'inline-block', }),
+                                                                            html.Div(children='  U', style={'font-family': font, 'font-size': '20%', 'display': 'inline-block'}),
+                                                                        ],
+                                                                        style={'text-align': 'center', 'padding': '12% 0'}
+                                                                    ),
+                                                                ],
+                                                                style={'height': '7rem', 'width': '7rem', 'position': 'relative', 'top': '0rem'},
+                                                                className='image-border-bottom',
+                                                                color=colors['bolus'][:-2] + str(min((hypos_bolus_avg_after[i]) / 8, 1)) + ')',
+                                                                id={'type': 'insights_hypos_card_bolus_avg_after', 'index': i}
+                                                            ),
+                                                        ],
+                                                    ),
+                                                ],
+                                                width=4
+                                            )
+                                        ],
+                                        style={'padding': '0%', 'margin': '0%'}
+                                    ),
+                                ],
+                                style=hypos_styles[i],
+                                id={'type': 'insights_hypos_pattern_card', 'index': i}
+                            )
+                            for i in range(0, num_insight_patterns)
+                        ], width=9),
+
+                    ################################################################################
+                    # HYPO INSIGHTS: FILTER SIDEBAR
+                    ################################################################################
+                    dbc.Col(
+                        html.Div(
+                            [
+                                ################################################################################
+                                # HYPO INSIGHTS: SIDEBAR TITLE
+                                ################################################################################
+                                html.Div('FILTER', style={'font-family': font, 'font-size': 'small', 'padding': '0% 0% 0% 0%', 'font-weight': 'bold'}),
+
+                                ################################################################################
+                                # HYPO INSIGHTS: PATTERN GRAPHS OVERLAYED
+                                ################################################################################
+                                dbc.Row(
+                                    dcc.Graph(
+                                        figure=hypos_graph_all_curves,
+                                        id='insights_hypos_graph_all_curves',
+                                        config={
+                                            'displayModeBar': False
+                                        }
+                                    ),
+                                ),
+                                html.Div(style={'padding': '0% 0 10%'}),
+
+                                ################################################################################
+                                # HYPO INSIGHTS: FILTER CHECKLIST TIME OF DAY
+                                ################################################################################
+                                html.Div(
+                                    [
+                                        dbc.Label("Time of day", style={'font-weight': 'bold'}),
+                                        dbc.Checklist(
+                                            options=[
+                                                {"label": "Morning (6:00 - 11:00)", "value": 1},
+                                                {"label": "Noon (11:00 - 16:00)", "value": 2},
+                                                {"label": "Evening (16:00 - 24:00)", "value": 3},
+                                                {"label": "Night (0:00 - 6:00)", "value": 4},
+                                            ],
+                                            value=[1, 2, 3, 4],
+                                            input_checked_style={
+                                                "backgroundColor": "#6c6c6c",
+                                                "borderColor": "#6c6c6c",
+                                            },
+                                            id="insights_hypos_checklist_time_of_day",
+                                        ),
+                                    ]
+                                ),
+
+                                ################################################################################
+                                # HYPO INSIGHTS: FILTER SLIDER MEAL SIZE
+                                ################################################################################
+                                dbc.Label("Meal size", style={'padding': '10% 0 0', 'font-weight': 'bold'}, html_for="range-slider-meal-size"),
+                                dcc.RangeSlider(id="insights_hypos_range_slider_meal_size",
+                                                min=40,
+                                                max=150,
+                                                step=10,
+                                                marks={
+                                                    0: '0 g',
+                                                    25: '25 g',
+                                                    50: '50 g',
+                                                    75: '75 g',
+                                                    100: '100 g',
+                                                    125: '125 g',
+                                                    150: '150 g',
+                                                },
+                                                value=[0, 150],
+                                                tooltip={"placement": "bottom", "always_visible": True},
+                                                ),
+                                html.Div(style={'padding': '0% 0 10%'}),
+
+                                ################################################################################
+                                # HYPO INSIGHTS: APPLY BUTTON
+                                ################################################################################
+                                dbc.Button("Apply",
+                                           id='insights_hypos_filter_apply_btn',
+                                           color="secondary",
+                                           className="me-1",
+                                           n_clicks=0,
+                                           disabled=True,
+                                           ),
+                            ],
+                            style=SIDEBAR_STYLE,
+                        ), width=3)
+                ]
+            )
+            , label="Hypos", labelClassName='text-dark', activeTabClassName="fw-bold"
+        ),
     ]
 )

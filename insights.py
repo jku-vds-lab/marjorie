@@ -787,7 +787,18 @@ def get_insight_data_hypos(filter_time_of_day=None, filter_meal_size=None):
         start_bgs.append(start_bg)
         end_bgs.append(end_bg)
     graphs_all_curves = get_curve_overview_plot(dataset_clusters, dataset_unfiltered)
-    return n_clusters_, most_occurring, graphs_meal_overview, graphs_all_curves, graphs_insights_meals, start_bgs, end_bgs, carb_avg_before, carb_avg_after, bolus_avg_before, bolus_avg_after
+
+    graphs_meal_overview += [{}] * (num_insight_patterns - n_clusters_)
+    graphs_insights_meals += [{}] * (num_insight_patterns - n_clusters_)
+    start_bgs += [1] * (num_insight_patterns - n_clusters_)
+    time_between += [1] * (num_insight_patterns - n_clusters_)
+    carb_avg_before += [1] * (num_insight_patterns - n_clusters_)
+    carb_avg_after += [1] * (num_insight_patterns - n_clusters_)
+    end_bgs += [1] * (num_insight_patterns - n_clusters_)
+    bolus_avg_before += [1] * (num_insight_patterns - n_clusters_)
+    bolus_avg_after += [1] * (num_insight_patterns - n_clusters_)
+
+    return n_clusters_, graphs_meal_overview, graphs_all_curves, graphs_insights_meals, start_bgs, end_bgs, carb_avg_before, carb_avg_after, bolus_avg_before, bolus_avg_after
 
 def hypo_event_sums(hypo_starts, logs, log_type):
     entries_before = []

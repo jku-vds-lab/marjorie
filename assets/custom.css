@@ -1,4 +1,16 @@
-/*.rc-slider-handle{border:solid 1px var(--bs-primary);background-color:var(--bs-body-bg)}.dbc*/
+#insights_hypos_range_slider_meal_size .rc-slider-handle {
+  background-color: #6c6c6c;
+  border-color: #6c6c6c;
+}
+
+#insights_hypos_range_slider_meal_size .rc-slider-dot-active {
+  background-color: #6c6c6c;
+  border-color: #6c6c6c;
+}
+
+#insights_hypos_range_slider_meal_size .rc-slider-track {
+  background-color: #6c6c6c;
+}
 
 #insights_meals_range_slider_meal_size .rc-slider-handle {
   background-color: #6c6c6c;
