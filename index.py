@@ -495,38 +495,38 @@ def overview_weekday_buttons(*args):
 ################################################################################
 
 @app.callback(
-    Input('meal_filter_apply_btn', 'n_clicks'),
-    Input("checklist-input-meals", 'value'),
-    Input('range-slider-meal-size', 'value'),
-    Output('graph_all_curves', 'figure'),
-    Output('meal_filter_apply_btn', 'disabled'),
-    *[Output('meal_insights_bar_graph_{}'.format(i), 'figure') for i in range(num_insight_patterns)],
-    *[Output('meal_insights_overview_graph_{}'.format(i), 'figure') for i in range(num_insight_patterns)],
-    Output({'type': 'sgv_before', 'index': ALL}, 'children'),
-    Output({'type': 'sgv_after', 'index': ALL}, 'children'),
-    Output({'type': 'interval', 'index': ALL}, 'children'),
-    Output({'type': 'meal_size', 'index': ALL}, 'children'),
-    Output({'type': 'bolus', 'index': ALL}, 'children'),
-    Output({'type': 'factor', 'index': ALL}, 'children'),
-    Output({'type': 'card_sgv_before', 'index': ALL}, 'color'),
-    Output({'type': 'card_sgv_after', 'index': ALL}, 'color'),
-    Output({'type': 'card_interval', 'index': ALL}, 'color'),
-    Output({'type': 'card_meal_size', 'index': ALL}, 'color'),
-    Output({'type': 'card_bolus', 'index': ALL}, 'color'),
-    Output({'type': 'card_factor', 'index': ALL}, 'color'),
-    Output({'type': 'pattern_card_meals', 'index': ALL}, 'style'),
+    Input('insights_meals_filter_apply_btn', 'n_clicks'),
+    Input("insights_meals_checklist_time_of_day", 'value'),
+    Input('insights_meals_range_slider_meal_size', 'value'),
+    Output('insights_meals_graph_all_curves', 'figure'),
+    Output('insights_meals_filter_apply_btn', 'disabled'),
+    *[Output('insights_meals_bar_graph_{}'.format(i), 'figure') for i in range(num_insight_patterns)],
+    *[Output('insights_meals_overview_graph_{}'.format(i), 'figure') for i in range(num_insight_patterns)],
+    Output({'type': 'insights_meals_sgv_before', 'index': ALL}, 'children'),
+    Output({'type': 'insights_meals_sgv_after', 'index': ALL}, 'children'),
+    Output({'type': 'insights_meals_interval', 'index': ALL}, 'children'),
+    Output({'type': 'insights_meals_meal_size', 'index': ALL}, 'children'),
+    Output({'type': 'insights_meals_bolus', 'index': ALL}, 'children'),
+    Output({'type': 'insights_meals_factor', 'index': ALL}, 'children'),
+    Output({'type': 'insights_meals_card_sgv_before', 'index': ALL}, 'color'),
+    Output({'type': 'insights_meals_card_sgv_after', 'index': ALL}, 'color'),
+    Output({'type': 'insights_meals_card_interval', 'index': ALL}, 'color'),
+    Output({'type': 'insights_meals_card_meal_size', 'index': ALL}, 'color'),
+    Output({'type': 'insights_meals_card_bolus', 'index': ALL}, 'color'),
+    Output({'type': 'insights_meals_card_factor', 'index': ALL}, 'color'),
+    Output({'type': 'insights_meals_pattern_card', 'index': ALL}, 'style'),
     # Output('n_patterns_meals', 'children')
 )
-def update_insights_meals(n_clicks, time_of_day_filter, meal_size_filter):
+def update_insights_meals(_, time_of_day_filter, meal_size_filter):
     time_of_day_filter = get_time_of_day_from_number(time_of_day_filter)
     triggered_id = ctx.triggered_id
 
-    if triggered_id == 'meal_filter_apply_btn':
-        n_clusters_, most_occurring, graphs_meal_overview, graphs_all_curves, graphs_insights_meals, start_bgs, time_between, carbs_sums, end_bgs, bolus_sums = get_insight_data_meals(
+    if triggered_id == 'insights_meals_filter_apply_btn':
+        print('##############################################')
+        n_clusters_, graphs_meal_overview, graphs_all_curves, graphs_insights_meals, start_bgs, time_between, carbs_sums, end_bgs, bolus_sums = get_insight_data_meals(
             filter_time_of_day=time_of_day_filter,
             filter_meal_size=meal_size_filter)
 
-        colors_rest = [dash.no_update] * (num_insight_patterns - n_clusters_)
         color_sgv_before = [colors_heatmap[list(np.array(targets_heatmap) > bg).index(True) - 1] for bg in start_bgs]
         color_sgv_after = [colors_heatmap[list(np.array(targets_heatmap) > bg).index(True) - 1] for bg in end_bgs]
         color_time_between = [get_prebolus_button_color(item) for item in time_between]

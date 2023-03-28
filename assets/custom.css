@@ -1,16 +1,16 @@
 /*.rc-slider-handle{border:solid 1px var(--bs-primary);background-color:var(--bs-body-bg)}.dbc*/
 
-#range-slider-meal-size .rc-slider-handle {
+#insights_meals_range_slider_meal_size .rc-slider-handle {
   background-color: #6c6c6c;
   border-color: #6c6c6c;
 }
 
-#range-slider-meal-size .rc-slider-dot-active {
+#insights_meals_range_slider_meal_size .rc-slider-dot-active {
   background-color: #6c6c6c;
   border-color: #6c6c6c;
 }
 
-#range-slider-meal-size .rc-slider-track {
+#insights_meals_range_slider_meal_size .rc-slider-track {
   background-color: #6c6c6c;
 }
 

@@ -685,6 +685,7 @@ def filter_function_meal_size(logs, filter):
     logs = logs[logs['carbs', 'sum'].between(filter[0], filter[1])]
     return logs
 
+
 def get_insight_data_meals(filter_time_of_day=None, filter_meal_size=None):
     logs_meals = get_logs_meals(start_date_insights, end_date, time_before_meal, time_after_meal)
     dataset_unfiltered, _ = get_dataset(logs_meals)
@@ -739,7 +740,7 @@ def get_insight_data_meals(filter_time_of_day=None, filter_meal_size=None):
     end_bgs += [1] * (num_insight_patterns - n_clusters_)
     bolus_sums += [1] * (num_insight_patterns - n_clusters_)
 
-    return n_clusters_, most_occurring, graphs_meal_overview, graphs_all_curves, graphs_insights_meals, start_bgs, time_between, carbs_sums, end_bgs, bolus_sums
+    return n_clusters_, graphs_meal_overview, graphs_all_curves, graphs_insights_meals, start_bgs, time_between, carbs_sums, end_bgs, bolus_sums
 
 def get_insight_data_hypos(filter_time_of_day=None, filter_meal_size=None):
     logs_hypos, hypo_starts = get_logs_hypos(start_date_insights, end_date, time_before_hypo, time_after_hypo)

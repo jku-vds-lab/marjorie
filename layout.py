@@ -1283,26 +1283,28 @@ layout_overview = html.Div(
 # INSIGHTS SECTION
 ################################################################################
 
-n_clusters_, most_occurring, graphs_meal_overview, graphs_all_curves, graphs_insights_meals, start_bgs, time_between, carbs_sums, end_bgs, bolus_sums = get_insight_data_meals()
-styles = [{'display': 'inline'}] * n_clusters_ + [{'display': 'none'}] * (num_insight_patterns - n_clusters_)
+meals_n_clusters_, meals_bar_graphs, meals_graph_all_curves, meals_graphs_insights, meals_start_bgs, meals_time_between, meals_carbs_sums, meals_end_bgs, meals_bolus_sums = get_insight_data_meals()
+meals_styles = [{'display': 'inline'}] * meals_n_clusters_ + [{'display': 'none'}] * (num_insight_patterns - meals_n_clusters_)
+# hypos_n_clusters_, hypos_graphs_overview, hypos_graph_all_curves, hypos_graphs_insights, hypos_start_bgs, hypos_time_between, hypos_carbs_sums, hypos_end_bgs, hypos_bolus_sums = get_insight_data_hypos()
+# hypos_styles = [{'display': 'inline'}] * hypos_n_clusters_ + [{'display': 'none'}] * (num_insight_patterns - hypos_n_clusters_)
 
 layout_insights = dbc.Tabs(
     [dbc.Tab(
         dbc.Row(
             [
                 ################################################################################
-                # PATTERN SCREEN
+                # MEAL INSIGHTS: PATTERN SCREEN
                 ################################################################################
                 dbc.Col(
                     ################################################################################
-                    # DISPLAYED PATTERN DIVS
+                    # MEAL INSIGHTS: DISPLAYED PATTERN DIVS
                     ################################################################################
                     [
                         # html.Div(children='{} patterns were found.'.format(n_clusters_), id='n_patterns_meals', style={'font-family': font, 'font-size': 'medium', 'padding': '1% 0% 2% 2%'}),
                         html.Div(
                             [
                                 ################################################################################
-                                # PATTERN HEADING
+                                # MEAL INSIGHTS: PATTERN HEADING
                                 ################################################################################
                                 dbc.Row(
                                     [
@@ -1313,18 +1315,18 @@ layout_insights = dbc.Tabs(
                                     ]
                                 ),
                                 ################################################################################
-                                # PATTERN CONTENT
+                                # MEAL INSIGHTS: PATTERN CONTENT
                                 ################################################################################
                                 dbc.Row(
                                     [
                                         ################################################################################
-                                        # PATTERN GRAPH
+                                        # MEAL INSIGHTS: PATTERN GRAPH
                                         ################################################################################
                                         dbc.Col(
                                             [
                                                 dcc.Graph(
-                                                    figure=graphs_insights_meals[i],
-                                                    id='meal_insights_overview_graph_{}'.format(i),
+                                                    figure=meals_graphs_insights[i],
+                                                    id='insights_meals_overview_graph_{}'.format(i),
                                                     config={
                                                         'displayModeBar': False
                                                     }
@@ -1332,17 +1334,17 @@ layout_insights = dbc.Tabs(
                                             ],
                                         ),
                                         ################################################################################
-                                        # PATTERN STATISTICS
+                                        # MEAL INSIGHTS: PATTERN STATISTICS
                                         ################################################################################
                                         dbc.Col(
                                             [
                                                 ################################################################################
-                                                # BAR CHART
+                                                # MEAL INSIGHTS: BAR CHART
                                                 ################################################################################
                                                 dbc.Row(
                                                     dcc.Graph(
-                                                        figure=graphs_meal_overview[i],
-                                                        id='meal_insights_bar_graph_{}'.format(i),
+                                                        figure=meals_bar_graphs[i],
+                                                        id='insights_meals_bar_graph_{}'.format(i),
                                                         config={
                                                             'displayModeBar': False
                                                         }
@@ -1350,7 +1352,7 @@ layout_insights = dbc.Tabs(
                                                     style={'padding': '0 0 5%'}
                                                 ),
                                                 ################################################################################
-                                                # STATISTIC CARDS
+                                                # MEAL INSIGHTS: STATISTIC CARDS
                                                 ################################################################################
                                                 dbc.Row(
                                                     [
@@ -1360,7 +1362,7 @@ layout_insights = dbc.Tabs(
                                                                                  style={'font-family': font, 'font-size': 'xx-small', 'padding': '10% 0% 0%', 'text-align': 'center', 'font-weight': 'bold'})),
                                                                 html.Div(
                                                                     [
-                                                                        html.Div(children=str(start_bgs[i]), id={'type': 'sgv_before', 'index': i},
+                                                                        html.Div(children=str(meals_start_bgs[i]), id={'type': 'insights_meals_sgv_before', 'index': i},
                                                                                  style={'font-family': font, 'font-size': 'small', 'font-weight': 'bold',
                                                                                         'display': 'inline-block', }),
                                                                         html.Div(children='  mg/dL', style={'font-family': font, 'font-size': '20%', 'display': 'inline-block'}),
@@ -1370,8 +1372,8 @@ layout_insights = dbc.Tabs(
                                                             ],
                                                             style={'height': '7rem', 'width': '7rem', 'margin': '0 2% 0 0'},
                                                             className='image-border-top',
-                                                            color=colors_heatmap[list(np.array(targets_heatmap) > start_bgs[i]).index(True) - 1],
-                                                            id={'type': 'card_sgv_before', 'index': i}
+                                                            color=colors_heatmap[list(np.array(targets_heatmap) > meals_start_bgs[i]).index(True) - 1],
+                                                            id={'type': 'insights_meals_card_sgv_before', 'index': i}
                                                         ),
                                                         dbc.Card(
                                                             [
@@ -1379,7 +1381,7 @@ layout_insights = dbc.Tabs(
                                                                                  style={'font-family': font, 'font-size': 'xx-small', 'padding': '3% 0% 0%', 'text-align': 'center', 'font-weight': 'bold'})),
                                                                 html.Div(
                                                                     [
-                                                                        html.Div(children=str(time_between[i]), id={'type': 'interval', 'index': i},
+                                                                        html.Div(children=str(meals_time_between[i]), id={'type': 'insights_meals_interval', 'index': i},
                                                                                  style={'font-family': font, 'font-size': 'small', 'font-weight': 'bold',
                                                                                         'display': 'inline-block', }),
                                                                         html.Div(children='  min', style={'font-family': font, 'font-size': '20%', 'display': 'inline-block'}),
@@ -1389,8 +1391,8 @@ layout_insights = dbc.Tabs(
                                                             ],
                                                             style={'height': '4rem', 'width': '7rem', 'margin': '0 0 0 0'},
                                                             className='image-border-left',
-                                                            color=get_prebolus_button_color(time_between[i]),
-                                                            id={'type': 'card_interval', 'index': i}
+                                                            color=get_prebolus_button_color(meals_time_between[i]),
+                                                            id={'type': 'insights_meals_card_interval', 'index': i}
                                                         ),
                                                         dbc.Card(
                                                             [
@@ -1398,7 +1400,7 @@ layout_insights = dbc.Tabs(
                                                                                  style={'font-family': font, 'font-size': 'xx-small', 'padding': '3% 0% 0%', 'text-align': 'center', 'font-weight': 'bold'})),
                                                                 html.Div(
                                                                     [
-                                                                        html.Div(children=str(round(carbs_sums[i] / bolus_sums[i])), id={'type': 'factor', 'index': i},
+                                                                        html.Div(children=str(round(meals_carbs_sums[i] / meals_bolus_sums[i])), id={'type': 'insights_meals_factor', 'index': i},
                                                                                  style={'font-family': font, 'font-size': 'small',
                                                                                         'font-weight': 'bold',
                                                                                         'display': 'inline-block', }),
@@ -1409,8 +1411,8 @@ layout_insights = dbc.Tabs(
                                                             ],
                                                             style={'height': '4rem', 'width': '7rem', 'margin': '0 0 0 0'},
                                                             className='image-border-right',
-                                                            color='rgba(157, 164, 169,' + str(min((carbs_sums[i] / bolus_sums[i]) / 10, 1)) + ')',
-                                                            id={'type': 'card_factor', 'index': i}
+                                                            color='rgba(157, 164, 169,' + str(min((meals_carbs_sums[i] / meals_bolus_sums[i]) / 10, 1)) + ')',
+                                                            id={'type': 'insights_meals_card_factor', 'index': i}
                                                         ),
                                                     ],
                                                 ),
@@ -1422,7 +1424,7 @@ layout_insights = dbc.Tabs(
                                                                                  style={'font-family': font, 'font-size': 'xx-small', 'padding': '10% 0% 0%', 'text-align': 'center', 'font-weight': 'bold'})),
                                                                 html.Div(
                                                                     [
-                                                                        html.Div(children=str(end_bgs[i]), id={'type': 'sgv_after', 'index': i},
+                                                                        html.Div(children=str(meals_end_bgs[i]), id={'type': 'insights_meals_sgv_after', 'index': i},
                                                                                  style={'font-family': font, 'font-size': 'small', 'font-weight': 'bold',
                                                                                         'display': 'inline-block', }),
                                                                         html.Div(children='  mg/dL', style={'font-family': font, 'font-size': '20%', 'display': 'inline-block'}),
@@ -1431,9 +1433,9 @@ layout_insights = dbc.Tabs(
                                                                 ),
                                                             ],
                                                             style={'height': '7rem', 'width': '7rem', 'margin': '0 2% 0 0'},
-                                                            color=colors_heatmap[list(np.array(targets_heatmap) > end_bgs[i]).index(True) - 1],
+                                                            color=colors_heatmap[list(np.array(targets_heatmap) > meals_end_bgs[i]).index(True) - 1],
                                                             className='image-border-bottom',
-                                                            id={'type': 'card_sgv_after', 'index': i}
+                                                            id={'type': 'insights_meals_card_sgv_after', 'index': i}
                                                         ),
                                                         dbc.Card(
                                                             [
@@ -1441,7 +1443,7 @@ layout_insights = dbc.Tabs(
                                                                                  style={'font-family': font, 'font-size': 'xx-small', 'padding': '20% 0% 0%', 'text-align': 'center', 'font-weight': 'bold'})),
                                                                 html.Div(
                                                                     [
-                                                                        html.Div(children=str(round(carbs_sums[i])), id={'type': 'meal_size', 'index': i},
+                                                                        html.Div(children=str(round(meals_carbs_sums[i])), id={'type': 'insights_meals_meal_size', 'index': i},
                                                                                  style={'font-family': font, 'font-size': 'small', 'font-weight': 'bold',
                                                                                         'display': 'inline-block', }),
                                                                         html.Div(children='  g', style={'font-family': font, 'font-size': '20%', 'display': 'inline-block'}),
@@ -1451,8 +1453,8 @@ layout_insights = dbc.Tabs(
                                                             ],
                                                             style={'height': '9rem', 'width': '7rem', 'position': 'relative', 'top': '-2rem'},
                                                             className='image-border',
-                                                            color=colors['carbs'][:-2] + str(min((carbs_sums[i] - 20) / 90, 1)) + ')',
-                                                            id={'type': 'card_meal_size', 'index': i}
+                                                            color=colors['carbs'][:-2] + str(min((meals_carbs_sums[i] - 20) / 90, 1)) + ')',
+                                                            id={'type': 'insights_meals_card_meal_size', 'index': i}
                                                         ),
 
                                                         dbc.Card(
@@ -1461,7 +1463,7 @@ layout_insights = dbc.Tabs(
                                                                                  style={'font-family': font, 'font-size': 'xx-small', 'padding': '20% 0% 0%', 'text-align': 'center', 'font-weight': 'bold'})),
                                                                 html.Div(
                                                                     [
-                                                                        html.Div(children=str(round(bolus_sums[i], 1)), id={'type': 'bolus', 'index': i},
+                                                                        html.Div(children=str(round(meals_bolus_sums[i], 1)), id={'type': 'insights_meals_bolus', 'index': i},
                                                                                  style={'font-family': font, 'font-size': 'small', 'font-weight': 'bold', 'display': 'inline-block', }),
                                                                         html.Div(children='  U', style={'font-family': font, 'font-size': '20%', 'display': 'inline-block'}),
                                                                     ],
@@ -1470,8 +1472,8 @@ layout_insights = dbc.Tabs(
                                                             ],
                                                             style={'height': '9rem', 'width': '7rem', 'position': 'relative', 'top': '-2rem'},
                                                             className='image-border',
-                                                            color=colors['bolus'][:-2] + str(min((bolus_sums[i] - 5) / 14, 1)) + ')',
-                                                            id={'type': 'card_bolus', 'index': i}
+                                                            color=colors['bolus'][:-2] + str(min((meals_bolus_sums[i] - 5) / 14, 1)) + ')',
+                                                            id={'type': 'insights_meals_card_bolus', 'index': i}
                                                         ),
                                                     ],
                                                 ),
@@ -1482,30 +1484,30 @@ layout_insights = dbc.Tabs(
                                     style={'padding': '0%', 'margin': '0%'}
                                 ),
                             ],
-                            style=styles[i],
-                            id={'type': 'pattern_card_meals', 'index': i}
+                            style=meals_styles[i],
+                            id={'type': 'insights_meals_pattern_card', 'index': i}
                         )
                         for i in range(0, num_insight_patterns)
                     ], width=9),
 
                 ################################################################################
-                # FILTER SIDEBAR
+                # MEAL INSIGHTS: FILTER SIDEBAR
                 ################################################################################
                 dbc.Col(
                     html.Div(
                         [
                             ################################################################################
-                            # SIDEBAR TITLE
+                            # MEAL INSIGHTS: SIDEBAR TITLE
                             ################################################################################
                             html.Div('FILTER', style={'font-family': font, 'font-size': 'small', 'padding': '0% 0% 0% 0%', 'font-weight': 'bold'}),
 
                             ################################################################################
-                            # PATTERN GRAPHS OVERLAYED
+                            # MEAL INSIGHTS: PATTERN GRAPHS OVERLAYED
                             ################################################################################
                             dbc.Row(
                                 dcc.Graph(
-                                    figure=graphs_all_curves,
-                                    id='graph_all_curves',
+                                    figure=meals_graph_all_curves,
+                                    id='insights_meals_graph_all_curves',
                                     config={
                                         'displayModeBar': False
                                     }
@@ -1514,7 +1516,7 @@ layout_insights = dbc.Tabs(
                             html.Div(style={'padding': '0% 0 10%'}),
 
                             ################################################################################
-                            # FILTER CHECKLIST TIME OF DAY
+                            # MEAL INSIGHTS: FILTER CHECKLIST TIME OF DAY
                             ################################################################################
                             html.Div(
                                 [
@@ -1531,16 +1533,16 @@ layout_insights = dbc.Tabs(
                                             "backgroundColor": "#6c6c6c",
                                             "borderColor": "#6c6c6c",
                                         },
-                                        id="checklist-input-meals",
+                                        id="insights_meals_checklist_time_of_day",
                                     ),
                                 ]
                             ),
 
                             ################################################################################
-                            # FILTER SLIDER MEAL SIZE
+                            # MEAL INSIGHTS: FILTER SLIDER MEAL SIZE
                             ################################################################################
                             dbc.Label("Meal size", style={'padding': '10% 0 0', 'font-weight': 'bold'}, html_for="range-slider-meal-size"),
-                            dcc.RangeSlider(id="range-slider-meal-size",
+                            dcc.RangeSlider(id="insights_meals_range_slider_meal_size",
                                             min=40,
                                             max=150,
                                             step=10,
@@ -1559,10 +1561,10 @@ layout_insights = dbc.Tabs(
                             html.Div(style={'padding': '0% 0 10%'}),
 
                             ################################################################################
-                            # APPLY BUTTON
+                            # MEAL INSIGHTS: APPLY BUTTON
                             ################################################################################
                             dbc.Button("Apply",
-                                       id='meal_filter_apply_btn',
+                                       id='insights_meals_filter_apply_btn',
                                        color="secondary",
                                        className="me-1",
                                        n_clicks=0,
@@ -1570,10 +1572,16 @@ layout_insights = dbc.Tabs(
                                        ),
                         ],
                         style=SIDEBAR_STYLE,
-                    ), width=3, class_name='xs-hide')
+                    ), width=3)
             ]
         ), label="Meals"
     ),
-        # dbc.Tab(hypo_overview, label="Hypos"),
+        # dbc.Tab(
+        #     dbc.Row(
+        #         [
+        #             ''
+        #         ]
+        #     )
+        #     , label="Hypos"),
     ]
 )

@@ -13,7 +13,7 @@ SIDEBAR_STYLE = {
     "height": "100%",
     # "overflow": "scroll",
     'overflow-x': 'hidden',
-    'z-index': '12000'
+    # 'z-index': '12000'
 }
 
 SIDEBAR_STYLE_LEFT = {
