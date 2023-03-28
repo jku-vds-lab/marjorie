@@ -117,7 +117,7 @@ layout_daily = html.Div(
                     max_date_allowed=date_max.date(),
                     initial_visible_month=date_max.date(),
                     date=date_max.date(),
-                    display_format='DD/MM/YYYY',
+                    display_format='YYYY/MM/DD',
                 ), style={'padding': '0 0 0 5.2%'}, width=6),
                 dbc.Col(html.Button(children=html.Span([html.I(className="fas fa-caret-right fa-2x")]),
                                     id='date_daily_forward',
@@ -411,6 +411,7 @@ layout_agp = html.Div(
                                                 initial_visible_month=date_max.date(),
                                                 start_date=start_date.date(),
                                                 end_date=end_date.date(),
+                                                display_format='YYYY/MM/DD',
                                                 style={'z-index': '9000'}
                                             )
                                         ]), width=6),
@@ -482,7 +483,6 @@ layout_agp = html.Div(
                             dbc.Card(
                                 children=
                                 [
-                                    # dbc.CardHeader('AGP'),
                                     dbc.CardBody(
                                         dcc.Graph(
                                             id='agp_graph',
@@ -497,12 +497,6 @@ layout_agp = html.Div(
                                 style={'padding': '0 2em'}
                             ),
                             style={'margin': '2rem 0rem'}
-                        ),
-                        html.Div(
-                            children=dcc.Graph(
-                                figure=agp_xaxis(width=620, margin_left=5)
-                            ),
-                            style={'position': 'relative', 'top': '-2.5em', 'left': '-0.5em', 'padding': '0rem 0rem 0rem 60px'}
                         ),
                         dbc.Button('Explore days in detail', id='agp_explore_button', n_clicks=0, outline=True, color='secondary')
                     ],
@@ -796,7 +790,7 @@ layout_overview = html.Div(
                                                 initial_visible_month=date_max.date(),
                                                 start_date=start_date.date(),
                                                 end_date=end_date.date(),
-                                                style={'z-index': '9000'}
+                                                display_format='YYYY/MM/DD',
                                             )
                                         ]), width=6),
                                     ################################################################################
@@ -858,7 +852,8 @@ layout_overview = html.Div(
                                     )
                                 ]
                             )
-                        ]),
+                        ],
+                        ),
                         ################################################################################
                         # AGP GRAPH
                         ################################################################################
@@ -1527,10 +1522,10 @@ layout_insights = dbc.Tabs(
                                     dbc.Label("Time of day", style={'font-weight': 'bold'}),
                                     dbc.Checklist(
                                         options=[
-                                            {"label": "Morning", "value": 1},
-                                            {"label": "Noon", "value": 2},
-                                            {"label": "Evening", "value": 3},
-                                            {"label": "Night", "value": 4},
+                                            {"label": "Morning (6:00 - 11:00)", "value": 1},
+                                            {"label": "Noon (11:00 - 16:00)", "value": 2},
+                                            {"label": "Evening (16:00 - 24:00)", "value": 3},
+                                            {"label": "Night (0:00 - 6:00)", "value": 4},
                                         ],
                                         value=[1, 2, 3, 4],
                                         id="checklist-input-meals",
