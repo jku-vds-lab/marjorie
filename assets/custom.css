@@ -1,3 +1,19 @@
+/*.rc-slider-handle{border:solid 1px var(--bs-primary);background-color:var(--bs-body-bg)}.dbc*/
+
+#range-slider-meal-size .rc-slider-handle {
+  background-color: #6c6c6c;
+  border-color: #6c6c6c;
+}
+
+#range-slider-meal-size .rc-slider-dot-active {
+  background-color: #6c6c6c;
+  border-color: #6c6c6c;
+}
+
+#range-slider-meal-size .rc-slider-track {
+  background-color: #6c6c6c;
+}
+
 .nav-pills .nav-link.active {
     color: #fff;
     background-color: #5c636a;
