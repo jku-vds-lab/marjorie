@@ -558,4 +558,4 @@ def update_insights_meals(n_clicks, time_of_day_filter, meal_size_filter):
 
 
 if __name__ == '__main__':
-    app.run_server(host='0.0.0.0', port=8050, debug=False)
+    app.run_server(host='0.0.0.0', port=8050, debug=True)

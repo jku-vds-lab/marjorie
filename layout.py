@@ -900,8 +900,7 @@ layout_overview = html.Div(
                                                      [
                                                          dbc.Col(
                                                              [
-                                                                 html.Button(children=days_horizon_graphs[i].strftime('%a, %d/%m'),
-                                                                             # children=days_pattern_detail[i].strftime('%a, %d/%m'),
+                                                                 html.Button(children=days_horizon_graphs[i].strftime('%a, %m/%d'),
                                                                              id='btn_agp_date-{}-'.format(i),
                                                                              n_clicks=0,
                                                                              style=buttons_style_agp_date
