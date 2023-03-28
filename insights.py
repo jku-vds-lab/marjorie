@@ -804,7 +804,7 @@ def hypo_event_sums(hypo_starts, logs, log_type):
     return avg_before, avg_after
 
 def get_curve_overview_plot(dataset, dataset_unfiltered):
-    layout = go.Layout(width=300, height=200, margin=dict(l=10, r=10, t=25, b=10))
+    layout = go.Layout(width=260, height=200, margin=dict(l=0, r=0, t=25, b=10))
     fig = go.Figure(layout=layout)
 
     x = np.linspace(time_before_meal * (-1), len(dataset_unfiltered[0]) * 5 / 60 - time_before_meal, len(dataset_unfiltered[0]))
