@@ -8,7 +8,11 @@
 
 ### Python
 
-1. Create a virtual env with the *requirements.txt*
-  We have developed and tested with python v3.8
-2. Run the app `python index.py`
-3. The app is available at http://localhost:8050/
+ We have developed and tested with python3.8
+ 
+1. Optional: Virtual Environment  
+  a. Create a virtual environment: `python -m venv env`  
+  b. Activate it: `source env/bin/activate`
+3. Install the dependencies: `python -m pip install -r requirements.txt`
+4. Run the app `python index.py`
+5. The app is available at http://localhost:8050/
