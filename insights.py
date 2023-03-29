@@ -1,3 +1,4 @@
+from collections import Counter
 from datetime import timedelta
 
 import numpy as np
@@ -42,10 +43,20 @@ def get_dtw_distance(data):
     return distance_matrix
 
 
+def sort_clusters(clusters):
+    frequencies = Counter(clusters)
+    frequencies = dict(frequencies.most_common())
+    clusters_ordered = [list(frequencies.keys()).index(n)+1 for n in clusters]
+    return np.array(clusters_ordered)
+
+
 def get_insight_clusters(dataset, max_d=200):
     distance_matrix = get_dtw_distance(dataset)
     Z = hierarchical_clustering(distance_matrix)
     clusters = get_clusters_from_z(Z, max_d)
+    print(clusters)
+    clusters = sort_clusters(clusters)
+    print(clusters)
     return clusters
 
 
