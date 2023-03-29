@@ -1850,6 +1850,7 @@ layout_insights = dbc.Tabs(
                                            className="me-1",
                                            n_clicks=0,
                                            disabled=True,
+                                           style={'margin': '10% 0'}
                                            ),
                             ],
                             style=SIDEBAR_STYLE,
