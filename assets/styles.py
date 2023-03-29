@@ -7,12 +7,13 @@ SIDEBAR_STYLE = {
     "right": 0,
     # "bottom": 0,
     "float": "right",
-    "width": "29rem",
+    # "width": "29rem",
     # "padding": "2rem 1rem",
     "background-color": "#f8f9fa",
     "height": "100%",
     # "overflow": "scroll",
     'overflow-x': 'hidden',
+    'overflow-y': 'hidden',
     "padding": "2rem 1rem",
     # 'z-index': '12000'
 }

@@ -99,284 +99,290 @@ layout_daily = html.Div(
             md=8,
             xs=12
         ),
-        dbc.Col(children=
-        [
-            ################################################################################
-            # DATE PICKER DAILY
-            ################################################################################
-            dbc.Row([
-                dbc.Col(html.Button(children=html.Span([html.I(className="fas fa-caret-left fa-2x", style={'position': 'relative', 'left': '-4px'})]),
-                                    id='date_daily_back',
-                                    n_clicks_timestamp=0,
-                                    style=buttons_style_icon
-                                    ),
-                        width=3),
-                dbc.Col(dcc.DatePickerSingle(
-                    id='date_picker_daily',
-                    min_date_allowed=date_min.date(),
-                    max_date_allowed=date_max.date(),
-                    initial_visible_month=date_max.date(),
-                    date=date_max.date(),
-                    display_format='YYYY/MM/DD',
-                ), style={'padding': '0 0 0 5.2%'}, width=6),
-                dbc.Col(html.Button(children=html.Span([html.I(className="fas fa-caret-right fa-2x")]),
-                                    id='date_daily_forward',
-                                    n_clicks_timestamp=0,
-                                    style=buttons_style_icon
-                                    ),
-                        width=3)
-            ],
-                style={'padding': '0em 0em 1em 0em'}
-            ),
-            ################################################################################
-            # STATISTICS DAILY
-            ################################################################################
+        dbc.Col(
             html.Div(
                 [
                     ################################################################################
-                    # BASIC METRICS
+                    # DATE PICKER DAILY
                     ################################################################################
-                    dbc.Row(
-                        [
-                            dbc.Col(
-                                dbc.Card(
-                                    [
-                                        dbc.Row(html.Div(children='eA1c', className='c-stats-card-tir__title')),
-                                        html.Div(
-                                            [
-                                                html.Div(children=str(round(stats['ea1c'], 1)), id='stats_daily_sgv_ea1c', className='c-stats-card__value'),
-                                                html.Div(children=' %', className='c-stats-card-tir__unit'),
-                                            ],
-                                            style={'text-align': 'center', 'padding': '12% 0'}
-                                        ),
-                                    ],
-                                    style={'height': '10rem', 'width': '10rem'},
-                                    className='image-border',
-                                ),
-                            ),
-                            dbc.Col(
-                                dbc.Card(
-                                    [
-                                        dbc.Row(html.Div(children='Average', className='c-stats-card-tir__title')),
-                                        html.Div(
-                                            [
-                                                html.Div(children=str(int(stats['mean'])), id='stats_daily_sgv_mean', className='c-stats-card__value'),
-                                                html.Div(children=' mg/dL', className='c-stats-card-tir__unit'),
-                                            ],
-                                            style={'text-align': 'center', 'padding': '12% 0'}
-                                        ),
-                                    ],
-                                    style={'height': '10rem', 'width': '10rem'},
-                                    className='image-border',
-                                ),
-                            ),
-                            dbc.Col(
-                                dbc.Card(
-                                    [
-                                        dbc.Row(html.Div(children='CV', className='c-stats-card-tir__title')),
-                                        html.Div(
-                                            [
-                                                html.Div(children=str(int(stats['std'] / stats['mean'] * 100)), id='stats_daily_sgv_std', className='c-stats-card__value'),
-                                                html.Div(children=' %', className='c-stats-card-tir__unit'),
-                                            ],
-                                            style={'text-align': 'center', 'padding': '12% 0'}
-                                        ),
-                                    ],
-                                    style={'height': '10rem', 'width': '10rem'},
-                                    className='image-border',
-                                ),
-                            )
-                        ]
+                    dbc.Row([
+                        dbc.Col(html.Button(children=html.Span([html.I(className="fas fa-caret-left fa-2x", style={'position': 'relative', 'left': '-4px'})]),
+                                            id='date_daily_back',
+                                            n_clicks_timestamp=0,
+                                            style=buttons_style_icon
+                                            ),
+                                width=3),
+                        dbc.Col(dcc.DatePickerSingle(
+                            id='date_picker_daily',
+                            min_date_allowed=date_min.date(),
+                            max_date_allowed=date_max.date(),
+                            initial_visible_month=date_max.date(),
+                            date=date_max.date(),
+                            display_format='YYYY/MM/DD',
+                        ), style={'padding': '0 0 0 5.2%'}, width=6),
+                        dbc.Col(html.Button(children=html.Span([html.I(className="fas fa-caret-right fa-2x")]),
+                                            id='date_daily_forward',
+                                            n_clicks_timestamp=0,
+                                            style=buttons_style_icon
+                                            ),
+                                width=3)
+                    ],
+                        style={'padding': '0em 0em 1em 0em'}
                     ),
                     ################################################################################
-                    # TIME IN RANGE
+                    # STATISTICS DAILY
                     ################################################################################
-                    html.Div(children='Time in Range', style={'font-size': 'small', 'padding': '3% 3%', 'font-weight': 'bold'}),
-                    dbc.Row(
-                        [
-                            dbc.Col(
-                                [
-                                    dbc.Card(
-                                        [
-                                            dbc.Row(html.Div(children='Low', className='c-stats-card-tir__title')),
-                                            dbc.Row(html.Div(children='54 - 70 mg/dl', className='c-stats-card-tir__range')),
-                                            html.Div(
-                                                [
-                                                    html.Div(children=str(tir[1]), id='stats_daily_low', className='c-stats-card-tir__value-x', style={'color': colors['bg_low']}),
-                                                    html.Div(children=' %', className='c-stats-card-tir__unit'),
-                                                ],
-                                                className='c-stats-card-tir__wrapper'
-                                            ),
-                                            dbc.Row(html.Div(children=calculate_tir_time(tir[1]), id='stats_daily_low_time', className='c-stats-card-tir__time', style={'top': '-2rem', 'color': colors['bg_low']})),
-                                        ],
-                                        style={'height': '8rem', 'width': '10rem'},
-                                        className='image-border-top',
-                                    ),
-                                    dbc.Card(
-                                        [
-                                            dbc.Row(html.Div(children='Very Low', className='c-stats-card-tir__title')),
-                                            dbc.Row(html.Div(children='< 54 mg/dl', className='c-stats-card-tir__range')),
-                                            html.Div(
-                                                [
-                                                    html.Div(children=str(tir[0]), id='stats_daily_very_low', className='c-stats-card-tir__value-x', style={'color': colors['bg_very_low']}),
-                                                    html.Div(children=' %', className='c-stats-card-tir__unit'),
-                                                ],
-                                                className='c-stats-card-tir__wrapper'
-                                            ),
-                                            dbc.Row(
-                                                html.Div(children=calculate_tir_time(tir[0]), id='stats_daily_very_low_time', className='c-stats-card-tir__time', style={'top': '-2rem', 'color': colors['bg_very_low']})),
-                                        ],
-                                        style={'height': '8rem', 'width': '10rem'},
-                                        className='image-border-bottom',
-                                    )
-                                ]
-                            ),
-                            dbc.Col(
-                                dbc.Card(
-                                    [
-                                        dbc.Row(html.Div(children='Target', className='c-stats-card-tir__title')),
-                                        dbc.Row(html.Div(children='70 - 180 mg/dl', className='c-stats-card-tir__range')),
-                                        html.Div(
-                                            [
-                                                html.Div(children=str(tir[2]), id='stats_daily_target', className='c-stats-card-tir__value-xx', style={'color': colors['bg_target']}),
-                                                html.Div(children=' %', className='c-stats-card-tir__unit'),
-                                            ],
-                                            style={'text-align': 'center', 'padding': '15% 0'}
-                                        ),
-                                        dbc.Row(html.Div(children=calculate_tir_time(tir[2]), id='stats_daily_target_time', className='c-stats-card-tir__time', style={'color': colors['bg_target'], })),
-                                    ],
-                                    style={'height': '16rem', 'width': '10rem'},
-                                    className='image-border',
-                                )
-                            ),
-                            dbc.Col(
-                                [
-                                    dbc.Card(
-                                        [
-                                            dbc.Row(html.Div(children='High', className='c-stats-card-tir__title')),
-                                            dbc.Row(html.Div(children='180 - 250 mg/dl', className='c-stats-card-tir__range')),
-                                            html.Div(
-                                                [
-                                                    html.Div(children=str(tir[3]), id='stats_daily_high', className='c-stats-card-tir__value-x', style={'color': colors['bg_high']}),
-                                                    html.Div(children=' %', className='c-stats-card-tir__unit'),
-                                                ],
-                                                className='c-stats-card-tir__wrapper'
-                                            ),
-                                            dbc.Row(html.Div(children=calculate_tir_time(tir[3]), id='stats_daily_high_time', className='c-stats-card-tir__time',
-                                                             style={'text-align': 'center', 'top': '-2rem', 'color': colors['bg_high']})),
-                                        ],
-                                        style={'height': '8rem', 'width': '10rem'},
-                                        className='image-border-top',
-                                    ),
-                                    dbc.Card(
-                                        [
-                                            html.Div(children='Very High', className='c-stats-card-tir__title'),
-                                            html.Div(children='> 250 mg/dl', className='c-stats-card-tir__range'),
-                                            html.Div(
-                                                [
-                                                    html.Div(children=str(tir[4]), id='stats_daily_very_high', className='c-stats-card-tir__value-x', style={'color': colors['bg_very_high']}),
-                                                    html.Div(children=' %', className='c-stats-card-tir__unit'),
-                                                ],
-                                                className='c-stats-card-tir__wrapper'
-                                            ),
-                                            dbc.Row(html.Div(children=calculate_tir_time(tir[4]), id='stats_daily_very_high_time', className="c-stats-card-tir__time",
-                                                             style={'top': '-2rem', 'color': colors['bg_very_high']})),
-                                        ],
-                                        style={'height': '8rem', 'width': '10rem'},
-                                        className='image-border-bottom',
-                                    )
-                                ]
-                            ),
-                        ]
-                    ),
                     html.Div(
-                        dcc.Graph(
-                            figure=get_tir_plot(tir),
-                            id='stats_daily_tir_graph',
-                            style={'padding': '0rem 0rem 0rem 0.5rem'},
-                            config={
-                                'displayModeBar': False
-                            }
-                        ),
-                        style={'border-radius': '25px 25px 25px 25px', 'overflow': 'hidden'}
-                    ),
-
-                    ################################################################################
-                    # TREATMENTS
-                    ################################################################################
-                    html.Div(children='Treatments', style={'font-size': 'small', 'padding': '0% 3% 3%', 'font-weight': 'bold'}),
-                    dbc.Row(
                         [
-                            dbc.Col(
-                                dbc.Card(
-                                    [
-                                        dbc.Row(html.Div(children='Carbs', className='c-stats-card-tir__title')),
-                                        html.Div(
+                            ################################################################################
+                            # BASIC METRICS
+                            ################################################################################
+                            dbc.Row(
+                                [
+                                    dbc.Col(
+                                        dbc.Card(
                                             [
-                                                html.Div(children=carbs_sum, id='stats_daily_carbs', className='c-stats-card__value', style={'color': colors['carbs']}),
-                                                html.Div(children=' g', className='c-stats-card-tir__unit'),
+                                                dbc.Row(html.Div(children='eA1c', className='c-stats-card-tir__title')),
+                                                html.Div(
+                                                    [
+                                                        html.Div(children=str(round(stats['ea1c'], 1)), id='stats_daily_sgv_ea1c', className='c-stats-card__value'),
+                                                        html.Div(children=' %', className='c-stats-card-tir__unit'),
+                                                    ],
+                                                    style={'text-align': 'center', 'padding': '12% 0'}
+                                                ),
                                             ],
-                                            style={'text-align': 'center', 'padding': '12% 0'}
+                                            style={'height': '10rem', 'width': '10rem'},
+                                            className='image-border',
                                         ),
-                                    ],
-                                    style={'height': '10rem', 'width': '10rem'},
-                                    className='image-border',
-                                ),
+                                    ),
+                                    dbc.Col(
+                                        dbc.Card(
+                                            [
+                                                dbc.Row(html.Div(children='Average', className='c-stats-card-tir__title')),
+                                                html.Div(
+                                                    [
+                                                        html.Div(children=str(int(stats['mean'])), id='stats_daily_sgv_mean', className='c-stats-card__value'),
+                                                        html.Div(children=' mg/dL', className='c-stats-card-tir__unit'),
+                                                    ],
+                                                    style={'text-align': 'center', 'padding': '12% 0'}
+                                                ),
+                                            ],
+                                            style={'height': '10rem', 'width': '10rem'},
+                                            className='image-border',
+                                        ),
+                                    ),
+                                    dbc.Col(
+                                        dbc.Card(
+                                            [
+                                                dbc.Row(html.Div(children='CV', className='c-stats-card-tir__title')),
+                                                html.Div(
+                                                    [
+                                                        html.Div(children=str(int(stats['std'] / stats['mean'] * 100)), id='stats_daily_sgv_std', className='c-stats-card__value'),
+                                                        html.Div(children=' %', className='c-stats-card-tir__unit'),
+                                                    ],
+                                                    style={'text-align': 'center', 'padding': '12% 0'}
+                                                ),
+                                            ],
+                                            style={'height': '10rem', 'width': '10rem'},
+                                            className='image-border',
+                                        ),
+                                    )
+                                ]
                             ),
-                            dbc.Col(
-                                dbc.Card(
-                                    [
-                                        dbc.Row(html.Div(children='Insulin ({} U)'.format(bolus_sum + basal_sum), className='c-stats-card-tir__title')),
-                                        html.Div(
-                                            dbc.Row(
+                            ################################################################################
+                            # TIME IN RANGE
+                            ################################################################################
+                            html.Div(children='Time in Range', style={'font-size': 'small', 'padding': '3% 3%', 'font-weight': 'bold'}),
+                            dbc.Row(
+                                [
+                                    dbc.Col(
+                                        [
+                                            dbc.Card(
                                                 [
-                                                    dbc.Col(
+                                                    dbc.Row(html.Div(children='Low', className='c-stats-card-tir__title')),
+                                                    dbc.Row(html.Div(children='54 - 70 mg/dl', className='c-stats-card-tir__range')),
+                                                    html.Div(
                                                         [
-                                                            html.Div(
-                                                                [
-                                                                    html.Div(children=bolus_sum, id='stats_daily_bolus', className='c-stats-card__value', style={'color': colors['bolus'], }),
-                                                                    html.Div(children=' U', className='c-stats-card-tir__unit'),
-                                                                ],
-                                                                style={'text-align': 'center', 'padding': '12% 0'}
-                                                            ),
-                                                            dbc.Row(html.Div(children=str(round(bolus_sum / (bolus_sum + basal_sum) * 100)) + ' %',
-                                                                             className='c-stats-card-treat__prctg',
-                                                                             style={'top': '-2rem', 'color': colors['bolus']})),
+                                                            html.Div(children=str(tir[1]), id='stats_daily_low', className='c-stats-card-tir__value-x', style={'color': colors['bg_low']}),
+                                                            html.Div(children=' %', className='c-stats-card-tir__unit'),
                                                         ],
-                                                        style={'border-right': '1px solid', 'border-color': 'LightGray'}
+                                                        className='c-stats-card-tir__wrapper'
                                                     ),
-                                                    dbc.Col(
-                                                        [
-                                                            html.Div(
-                                                                [
-                                                                    html.Div(children=basal_sum, id='stats_daily_basal', className='c-stats-card__value', style={'color': colors['basal'], }),
-                                                                    html.Div(children=' U', className='c-stats-card-tir__unit'),
-                                                                ],
-                                                                style={'text-align': 'center', 'padding': '12% 0'}
-                                                            ),
-                                                            dbc.Row(
-                                                                html.Div(children=str(round(basal_sum / (bolus_sum + basal_sum) * 100)) + ' %',
-                                                                         className='c-stats-card-treat__prctg',
-                                                                         style={'top': '-2rem', 'color': colors['basal']})),
-                                                        ]
-                                                    ),
+                                                    dbc.Row(
+                                                        html.Div(children=calculate_tir_time(tir[1]), id='stats_daily_low_time', className='c-stats-card-tir__time', style={'top': '-2rem', 'color': colors['bg_low']})),
                                                 ],
-                                                className="h-75",
+                                                style={'height': '8rem', 'width': '10rem'},
+                                                className='image-border-top',
                                             ),
-                                        ),
-
-                                    ],
-                                    style={'height': '10rem', 'width': '22rem'},
-                                    className='image-border',
+                                            dbc.Card(
+                                                [
+                                                    dbc.Row(html.Div(children='Very Low', className='c-stats-card-tir__title')),
+                                                    dbc.Row(html.Div(children='< 54 mg/dl', className='c-stats-card-tir__range')),
+                                                    html.Div(
+                                                        [
+                                                            html.Div(children=str(tir[0]), id='stats_daily_very_low', className='c-stats-card-tir__value-x', style={'color': colors['bg_very_low']}),
+                                                            html.Div(children=' %', className='c-stats-card-tir__unit'),
+                                                        ],
+                                                        className='c-stats-card-tir__wrapper'
+                                                    ),
+                                                    dbc.Row(
+                                                        html.Div(children=calculate_tir_time(tir[0]), id='stats_daily_very_low_time', className='c-stats-card-tir__time',
+                                                                 style={'top': '-2rem', 'color': colors['bg_very_low']})),
+                                                ],
+                                                style={'height': '8rem', 'width': '10rem'},
+                                                className='image-border-bottom',
+                                            )
+                                        ]
+                                    ),
+                                    dbc.Col(
+                                        dbc.Card(
+                                            [
+                                                dbc.Row(html.Div(children='Target', className='c-stats-card-tir__title')),
+                                                dbc.Row(html.Div(children='70 - 180 mg/dl', className='c-stats-card-tir__range')),
+                                                html.Div(
+                                                    [
+                                                        html.Div(children=str(tir[2]), id='stats_daily_target', className='c-stats-card-tir__value-xx', style={'color': colors['bg_target']}),
+                                                        html.Div(children=' %', className='c-stats-card-tir__unit'),
+                                                    ],
+                                                    style={'text-align': 'center', 'padding': '15% 0'}
+                                                ),
+                                                dbc.Row(html.Div(children=calculate_tir_time(tir[2]), id='stats_daily_target_time', className='c-stats-card-tir__time', style={'color': colors['bg_target'], })),
+                                            ],
+                                            style={'height': '16rem', 'width': '10rem'},
+                                            className='image-border',
+                                        )
+                                    ),
+                                    dbc.Col(
+                                        [
+                                            dbc.Card(
+                                                [
+                                                    dbc.Row(html.Div(children='High', className='c-stats-card-tir__title')),
+                                                    dbc.Row(html.Div(children='180 - 250 mg/dl', className='c-stats-card-tir__range')),
+                                                    html.Div(
+                                                        [
+                                                            html.Div(children=str(tir[3]), id='stats_daily_high', className='c-stats-card-tir__value-x', style={'color': colors['bg_high']}),
+                                                            html.Div(children=' %', className='c-stats-card-tir__unit'),
+                                                        ],
+                                                        className='c-stats-card-tir__wrapper'
+                                                    ),
+                                                    dbc.Row(html.Div(children=calculate_tir_time(tir[3]), id='stats_daily_high_time', className='c-stats-card-tir__time',
+                                                                     style={'text-align': 'center', 'top': '-2rem', 'color': colors['bg_high']})),
+                                                ],
+                                                style={'height': '8rem', 'width': '10rem'},
+                                                className='image-border-top',
+                                            ),
+                                            dbc.Card(
+                                                [
+                                                    html.Div(children='Very High', className='c-stats-card-tir__title'),
+                                                    html.Div(children='> 250 mg/dl', className='c-stats-card-tir__range'),
+                                                    html.Div(
+                                                        [
+                                                            html.Div(children=str(tir[4]), id='stats_daily_very_high', className='c-stats-card-tir__value-x', style={'color': colors['bg_very_high']}),
+                                                            html.Div(children=' %', className='c-stats-card-tir__unit'),
+                                                        ],
+                                                        className='c-stats-card-tir__wrapper'
+                                                    ),
+                                                    dbc.Row(html.Div(children=calculate_tir_time(tir[4]), id='stats_daily_very_high_time', className="c-stats-card-tir__time",
+                                                                     style={'top': '-2rem', 'color': colors['bg_very_high']})),
+                                                ],
+                                                style={'height': '8rem', 'width': '10rem'},
+                                                className='image-border-bottom',
+                                            )
+                                        ]
+                                    ),
+                                ]
+                            ),
+                            html.Div(
+                                dcc.Graph(
+                                    figure=get_tir_plot(tir),
+                                    id='stats_daily_tir_graph',
+                                    style={'padding': '0rem 0rem 0rem 0.5rem'},
+                                    config={
+                                        'displayModeBar': False
+                                    }
                                 ),
-                                width=8
+                                style={'border-radius': '25px 25px 25px 25px', 'overflow': 'hidden'}
+                            ),
+
+                            ################################################################################
+                            # TREATMENTS
+                            ################################################################################
+                            html.Div(children='Treatments', style={'font-size': 'small', 'padding': '0% 3% 3%', 'font-weight': 'bold'}),
+                            dbc.Row(
+                                [
+                                    dbc.Col(
+                                        dbc.Card(
+                                            [
+                                                dbc.Row(html.Div(children='Carbs', className='c-stats-card-tir__title')),
+                                                html.Div(
+                                                    [
+                                                        html.Div(children=carbs_sum, id='stats_daily_carbs', className='c-stats-card__value', style={'color': colors['carbs']}),
+                                                        html.Div(children=' g', className='c-stats-card-tir__unit'),
+                                                    ],
+                                                    style={'text-align': 'center', 'padding': '12% 0'}
+                                                ),
+                                            ],
+                                            style={'height': '10rem', 'width': '10rem'},
+                                            className='image-border',
+                                        ),
+                                    ),
+                                    dbc.Col(
+                                        dbc.Card(
+                                            [
+                                                dbc.Row(html.Div(children='Insulin ({} U)'.format(bolus_sum + basal_sum), className='c-stats-card-tir__title')),
+                                                html.Div(
+                                                    dbc.Row(
+                                                        [
+                                                            dbc.Col(
+                                                                [
+                                                                    html.Div(
+                                                                        [
+                                                                            html.Div(children=bolus_sum, id='stats_daily_bolus', className='c-stats-card__value', style={'color': colors['bolus'], }),
+                                                                            html.Div(children=' U', className='c-stats-card-tir__unit'),
+                                                                        ],
+                                                                        style={'text-align': 'center', 'padding': '12% 0'}
+                                                                    ),
+                                                                    dbc.Row(html.Div(children=str(round(bolus_sum / (bolus_sum + basal_sum) * 100)) + ' %',
+                                                                                     className='c-stats-card-treat__prctg',
+                                                                                     style={'top': '-2rem', 'color': colors['bolus']})),
+                                                                ],
+                                                                style={'border-right': '1px solid', 'border-color': 'LightGray'}
+                                                            ),
+                                                            dbc.Col(
+                                                                [
+                                                                    html.Div(
+                                                                        [
+                                                                            html.Div(children=basal_sum, id='stats_daily_basal', className='c-stats-card__value', style={'color': colors['basal'], }),
+                                                                            html.Div(children=' U', className='c-stats-card-tir__unit'),
+                                                                        ],
+                                                                        style={'text-align': 'center', 'padding': '12% 0'}
+                                                                    ),
+                                                                    dbc.Row(
+                                                                        html.Div(children=str(round(basal_sum / (bolus_sum + basal_sum) * 100)) + ' %',
+                                                                                 className='c-stats-card-treat__prctg',
+                                                                                 style={'top': '-2rem', 'color': colors['basal']})),
+                                                                ]
+                                                            ),
+                                                        ],
+                                                        className="h-75",
+                                                    ),
+                                                ),
+
+                                            ],
+                                            style={'height': '10rem', 'width': '22rem'},
+                                            className='image-border',
+                                        ),
+                                        width=8
+                                    )
+                                ]
                             )
                         ]
                     )
-                ]
-            )
-        ],
-            width=4, md=4, className="sm-hide")
+                ],
+                style=SIDEBAR_STYLE
+            ),
+            width=4, md=4, className="sm-hide"
+        )
     ])
 )
 
@@ -756,7 +762,7 @@ layout_agp = html.Div(
                                 ]
                             )
                         ],
-                        style={'position': 'fixed', 'top': '0', 'z-index': '900', 'height': '100%', "background-color": "#f8f9fa"}
+                        style=SIDEBAR_STYLE
                     ),
                     width=4,
                 ),
@@ -1020,7 +1026,7 @@ layout_overview = html.Div(
                     html.Div(
                         children=[
                             ################################################################################
-                            # STATISTICS AGP
+                            # STATISTICS OVERVIEW
                             ################################################################################
                             html.Div(
                                 [
@@ -1270,7 +1276,7 @@ layout_overview = html.Div(
                                 ]
                             )
                         ],
-                        style={'position': 'fixed', 'top': '0', 'z-index': '900', 'height': '100%', "background-color": "#f8f9fa"}
+                        style=SIDEBAR_STYLE
                     ),
                     width=4,
                 ),
@@ -1374,7 +1380,7 @@ layout_insights = dbc.Tabs(
                                                                     style={'text-align': 'center', 'padding': '12% 0'}
                                                                 ),
                                                             ],
-                                                            style={'height': '7rem', 'width': '7rem', 'margin': '0 2% 0 0', 'color': get_button_text_color(meals_start_bgs[i]/380)},
+                                                            style={'height': '7rem', 'width': '7rem', 'margin': '0 2% 0 0', 'color': get_button_text_color(meals_start_bgs[i] / 380)},
                                                             className='image-border-top',
                                                             color=colors_heatmap[list(np.array(targets_heatmap) > meals_start_bgs[i]).index(True) - 1],
                                                             id={'type': 'insights_meals_card_sgv_before', 'index': i}
@@ -1393,7 +1399,7 @@ layout_insights = dbc.Tabs(
                                                                     style={'text-align': 'center', 'padding': '0% 0'}
                                                                 ),
                                                             ],
-                                                            style={'height': '4rem', 'width': '7rem', 'margin': '0 0 0 0', 'color': get_button_text_color(meals_time_between[i]/30)},
+                                                            style={'height': '4rem', 'width': '7rem', 'margin': '0 0 0 0', 'color': get_button_text_color(meals_time_between[i] / 30)},
                                                             className='image-border-left',
                                                             color=get_prebolus_button_color(meals_time_between[i]),
                                                             id={'type': 'insights_meals_card_interval', 'index': i}
@@ -1436,7 +1442,7 @@ layout_insights = dbc.Tabs(
                                                                     style={'text-align': 'center', 'padding': '12% 0'}
                                                                 ),
                                                             ],
-                                                            style={'height': '7rem', 'width': '7rem', 'margin': '0 2% 0 0', 'color': get_button_text_color(meals_end_bgs[i]/380)},
+                                                            style={'height': '7rem', 'width': '7rem', 'margin': '0 2% 0 0', 'color': get_button_text_color(meals_end_bgs[i] / 380)},
                                                             color=colors_heatmap[list(np.array(targets_heatmap) > meals_end_bgs[i]).index(True) - 1],
                                                             className='image-border-bottom',
                                                             id={'type': 'insights_meals_card_sgv_after', 'index': i}
@@ -1665,7 +1671,7 @@ layout_insights = dbc.Tabs(
                                                                         style={'text-align': 'center', 'padding': '12% 0'}
                                                                     ),
                                                                 ],
-                                                                style={'height': '7rem', 'width': '7rem', 'margin': '0 2% 0 0', 'color': get_button_text_color(hypos_start_bgs[i]/380)},
+                                                                style={'height': '7rem', 'width': '7rem', 'margin': '0 2% 0 0', 'color': get_button_text_color(hypos_start_bgs[i] / 380)},
                                                                 className='image-border-top',
                                                                 color=colors_heatmap[list(np.array(targets_heatmap) > hypos_start_bgs[i]).index(True) - 1],
                                                                 id={'type': 'insights_hypos_card_sgv_before', 'index': i}
@@ -1732,7 +1738,7 @@ layout_insights = dbc.Tabs(
                                                                         style={'text-align': 'center', 'padding': '12% 0'}
                                                                     ),
                                                                 ],
-                                                                style={'height': '7rem', 'width': '7rem', 'margin': '0 2% 0 0', 'color': get_button_text_color(hypos_end_bgs[i]/380)},
+                                                                style={'height': '7rem', 'width': '7rem', 'margin': '0 2% 0 0', 'color': get_button_text_color(hypos_end_bgs[i] / 380)},
                                                                 color=colors_heatmap[list(np.array(targets_heatmap) > hypos_end_bgs[i]).index(True) - 1],
                                                                 className='image-border-bottom',
                                                                 id={'type': 'insights_hypos_card_sgv_after', 'index': i}

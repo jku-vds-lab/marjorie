@@ -329,8 +329,8 @@ def draw_full_agp(start_date, end_date, weekday_filter=None):
     fig_agp.update_layout(
         yaxis_range=[30, 300],
         showlegend=False,
-        width=620,
-        height=400,
+        # width=620,
+        # height=400,
         xaxis4=dict(
             tickmode='array',
             tickvals=x_values,

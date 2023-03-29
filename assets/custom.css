@@ -67,6 +67,10 @@ html, body {
 #daily_graph {
     width: 100%;
 }
+
+#agp_graph {
+    width: 100%;
+}
 /* Stats card */
 
 .c-stats-card-tir__title{
