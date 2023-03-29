@@ -1,5 +1,7 @@
 # Marjorie
 
+Marjorie is a web-based approach to visualize and explore patterns in type 1 diabetes data.
+
 ## Local Setup
 ### Docker
 
