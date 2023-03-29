@@ -838,7 +838,7 @@ def hypo_event_sums(hypo_starts, logs, log_type):
 
 
 def get_curve_overview_plot(dataset, dataset_unfiltered, insights_type='meals'):
-    layout = go.Layout(width=260, height=200, margin=dict(l=0, r=0, t=25, b=10))
+    layout = go.Layout(width=220, height=200, margin=dict(l=0, r=0, t=25, b=10))
     fig = go.Figure(layout=layout)
 
     if insights_type == 'meals':

@@ -14,7 +14,7 @@ SIDEBAR_STYLE = {
     # "overflow": "scroll",
     'overflow-x': 'hidden',
     'overflow-y': 'hidden',
-    "padding": "2rem 1rem",
+    "padding": "2rem 2rem",
     # 'z-index': '12000'
 }
 
