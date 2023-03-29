@@ -90,7 +90,7 @@ def dropna(x):
 
 
 def draw_hierarchical_pattern_overview(dataset, dataset_array, dataset_carbs, dataset_bolus, text, time_before=0):
-    fig = make_subplots(rows=4, cols=1, shared_xaxes=True, row_heights=[0.76, 0.12, 0.06, 0.06], vertical_spacing=0.025)
+    fig = make_subplots(rows=4, cols=1, shared_xaxes=True, row_heights=[0.82, 0.06, 0.06, 0.06], vertical_spacing=0.025)
 
     for data_sgv, data_carbs, data_bolus in zip(dataset, dataset_carbs, dataset_bolus):
 
@@ -225,8 +225,8 @@ def draw_hierarchical_pattern_overview(dataset, dataset_array, dataset_carbs, da
         go.Heatmap(
             z=[z],
             x=tickvals,
-            y=['a'],
-            text=[text],
+            y=[''],
+            # text=[text],
             texttemplate="%{text}",
             colorscale=colormap_heatmap,
             zmin=1,
