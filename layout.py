@@ -41,7 +41,7 @@ app.layout = html.Div([
             ################################################################################
             html.Div(
                 [
-                    html.Img(src=app.get_asset_url('marjorie-logo.svg'), style={'width': '100%'}),
+                    html.Div(html.Img(src=app.get_asset_url('marjorie-logo.svg'), style={'width': '70%'}), style={'text-align': 'center'}),
                     html.Img(src=app.get_asset_url('marjorie-text.svg'), style={'width': '100%', 'margin-top': '1rem'}),
                     html.Hr(style={'border-color': '#5c636a', 'margin': '1rem 0'}),
                     dbc.Nav(
