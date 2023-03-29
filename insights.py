@@ -797,7 +797,7 @@ def get_insight_data_hypos(filter_time_of_day=None):
         start_bg, end_bg = get_start_end_bg(dataset_cluster)
         start_bgs.append(start_bg)
         end_bgs.append(end_bg)
-    graphs_all_curves = get_curve_overview_plot(dataset_clusters, dataset_unfiltered)
+    graphs_all_curves = get_curve_overview_plot(dataset_clusters, dataset_unfiltered, insights_type='hypos')
 
     graphs_meal_overview += [{}] * (num_insight_patterns - n_clusters_)
     graphs_insights_meals += [{}] * (num_insight_patterns - n_clusters_)
@@ -825,13 +825,19 @@ def hypo_event_sums(hypo_starts, logs, log_type):
     avg_after = sum(entries_after) / len(logs)
     return avg_before, avg_after
 
-def get_curve_overview_plot(dataset, dataset_unfiltered):
+
+def get_curve_overview_plot(dataset, dataset_unfiltered, insights_type='meals'):
     layout = go.Layout(width=260, height=200, margin=dict(l=0, r=0, t=25, b=10))
     fig = go.Figure(layout=layout)
 
-    x = np.linspace(time_before_meal * (-1), len(dataset_unfiltered[0]) * 5 / 60 - time_before_meal, len(dataset_unfiltered[0]))
-    tickvals = [i for i in range(int(x[0]), int(x[-1])+1)]
-    ticklabels = [item if item != 0 else 'Meal start' for item in tickvals]
+    if insights_type == 'meals':
+        x = np.linspace(time_before_meal * (-1), len(dataset_unfiltered[0]) * 5 / 60 - time_before_meal, len(dataset_unfiltered[0]))
+        tickvals = [i for i in range(int(x[0]), int(x[-1]) + 1)]
+        ticklabels = [item if item != 0 else 'Meal start' for item in tickvals]
+    else:
+        x = np.linspace(time_before_hypo * (-1), len(dataset_unfiltered[0]) * 5 / 60 - time_before_hypo, len(dataset_unfiltered[0]))
+        tickvals = [i for i in range(int(x[0]), int(x[-1]) + 1)]
+        ticklabels = [item if item != 0 else 'Hypo start' for item in tickvals]
 
     for data in dataset_unfiltered:
         fig.add_trace(
