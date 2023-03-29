@@ -230,3 +230,10 @@ def get_prebolus_button_color(value):
         return 'rgba(173, 63, 95,' + str(min(-value/30, 1)) + ')'
     else:
         return 'rgba(16, 125, 121,' + str(min(value/30, 1)) + ')'
+
+
+def get_button_text_color(value):
+    if value <= 0.5:
+        return 'black'
+    else:
+        return 'white'

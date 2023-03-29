@@ -5,7 +5,7 @@ import dash_bootstrap_components as dbc
 from dash import dcc, html, ctx
 from dash_extensions.enrich import Output, DashProxy, Input, MultiplexerTransform, State, callback_context, ALL
 from aggregations import draw_seasonal_graph_day, draw_seasonal_graph, draw_agp_carbs_bolus, draw_full_agp, agp_xaxis
-from colors import colors_patterns, colors_heatmap, targets_heatmap, get_prebolus_button_color
+from colors import colors_patterns, colors_heatmap, targets_heatmap, get_prebolus_button_color, get_button_text_color
 from daily import draw_daily_plot
 import numpy as np
 from insights import draw_pattern_overview, add_time_before_after, get_insight_dataset, get_insight_clusters, draw_hierarchical_pattern_overview, get_logs_meals, get_logs_from_indices, get_insight_data_meals, \
@@ -1368,13 +1368,13 @@ layout_insights = dbc.Tabs(
                                                                     [
                                                                         html.Div(children=str(meals_start_bgs[i]), id={'type': 'insights_meals_sgv_before', 'index': i},
                                                                                  style={'font-family': font, 'font-size': 'small', 'font-weight': 'bold',
-                                                                                        'display': 'inline-block', }),
+                                                                                        'display': 'inline-block'}),
                                                                         html.Div(children='  mg/dL', style={'font-family': font, 'font-size': '20%', 'display': 'inline-block'}),
                                                                     ],
                                                                     style={'text-align': 'center', 'padding': '12% 0'}
                                                                 ),
                                                             ],
-                                                            style={'height': '7rem', 'width': '7rem', 'margin': '0 2% 0 0'},
+                                                            style={'height': '7rem', 'width': '7rem', 'margin': '0 2% 0 0', 'color': get_button_text_color(meals_start_bgs[i]/380)},
                                                             className='image-border-top',
                                                             color=colors_heatmap[list(np.array(targets_heatmap) > meals_start_bgs[i]).index(True) - 1],
                                                             id={'type': 'insights_meals_card_sgv_before', 'index': i}
@@ -1387,13 +1387,13 @@ layout_insights = dbc.Tabs(
                                                                     [
                                                                         html.Div(children=str(meals_time_between[i]), id={'type': 'insights_meals_interval', 'index': i},
                                                                                  style={'font-family': font, 'font-size': 'small', 'font-weight': 'bold',
-                                                                                        'display': 'inline-block', }),
+                                                                                        'display': 'inline-block'}),
                                                                         html.Div(children='  min', style={'font-family': font, 'font-size': '20%', 'display': 'inline-block'}),
                                                                     ],
                                                                     style={'text-align': 'center', 'padding': '0% 0'}
                                                                 ),
                                                             ],
-                                                            style={'height': '4rem', 'width': '7rem', 'margin': '0 0 0 0'},
+                                                            style={'height': '4rem', 'width': '7rem', 'margin': '0 0 0 0', 'color': get_button_text_color(meals_time_between[i]/30)},
                                                             className='image-border-left',
                                                             color=get_prebolus_button_color(meals_time_between[i]),
                                                             id={'type': 'insights_meals_card_interval', 'index': i}
@@ -1430,13 +1430,13 @@ layout_insights = dbc.Tabs(
                                                                     [
                                                                         html.Div(children=str(meals_end_bgs[i]), id={'type': 'insights_meals_sgv_after', 'index': i},
                                                                                  style={'font-family': font, 'font-size': 'small', 'font-weight': 'bold',
-                                                                                        'display': 'inline-block', }),
+                                                                                        'display': 'inline-block'}),
                                                                         html.Div(children='  mg/dL', style={'font-family': font, 'font-size': '20%', 'display': 'inline-block'}),
                                                                     ],
                                                                     style={'text-align': 'center', 'padding': '12% 0'}
                                                                 ),
                                                             ],
-                                                            style={'height': '7rem', 'width': '7rem', 'margin': '0 2% 0 0'},
+                                                            style={'height': '7rem', 'width': '7rem', 'margin': '0 2% 0 0', 'color': get_button_text_color(meals_end_bgs[i]/380)},
                                                             color=colors_heatmap[list(np.array(targets_heatmap) > meals_end_bgs[i]).index(True) - 1],
                                                             className='image-border-bottom',
                                                             id={'type': 'insights_meals_card_sgv_after', 'index': i}
@@ -1659,13 +1659,13 @@ layout_insights = dbc.Tabs(
                                                                         [
                                                                             html.Div(children=str(hypos_start_bgs[i]), id={'type': 'insights_hypos_sgv_before', 'index': i},
                                                                                      style={'font-family': font, 'font-size': 'small', 'font-weight': 'bold',
-                                                                                            'display': 'inline-block', }),
+                                                                                            'display': 'inline-block'}),
                                                                             html.Div(children='  mg/dL', style={'font-family': font, 'font-size': '20%', 'display': 'inline-block'}),
                                                                         ],
                                                                         style={'text-align': 'center', 'padding': '12% 0'}
                                                                     ),
                                                                 ],
-                                                                style={'height': '7rem', 'width': '7rem', 'margin': '0 2% 0 0'},
+                                                                style={'height': '7rem', 'width': '7rem', 'margin': '0 2% 0 0', 'color': get_button_text_color(hypos_start_bgs[i]/380)},
                                                                 className='image-border-top',
                                                                 color=colors_heatmap[list(np.array(targets_heatmap) > hypos_start_bgs[i]).index(True) - 1],
                                                                 id={'type': 'insights_hypos_card_sgv_before', 'index': i}
@@ -1732,7 +1732,7 @@ layout_insights = dbc.Tabs(
                                                                         style={'text-align': 'center', 'padding': '12% 0'}
                                                                     ),
                                                                 ],
-                                                                style={'height': '7rem', 'width': '7rem', 'margin': '0 2% 0 0'},
+                                                                style={'height': '7rem', 'width': '7rem', 'margin': '0 2% 0 0', 'color': get_button_text_color(hypos_end_bgs[i]/380)},
                                                                 color=colors_heatmap[list(np.array(targets_heatmap) > hypos_end_bgs[i]).index(True) - 1],
                                                                 className='image-border-bottom',
                                                                 id={'type': 'insights_hypos_card_sgv_after', 'index': i}
