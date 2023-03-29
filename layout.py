@@ -1711,7 +1711,7 @@ layout_insights = dbc.Tabs(
                                                                 ],
                                                                 style={'height': '7rem', 'width': '7rem', 'margin': '0 0 0 0', 'position': 'relative', 'top': '0rem'},
                                                                 className='image-border-top',
-                                                                color=colors['bolus'][:-2] + str(min((hypos_bolus_avg_before[i]) / 8, 1)) + ')',
+                                                                color=colors['bolus'][:-2] + str(min((hypos_bolus_avg_before[i]) / 5, 1)) + ')',
                                                                 id={'type': 'insights_hypos_card_bolus_avg_before', 'index': i}
                                                             ),
                                                         ],
@@ -1776,7 +1776,7 @@ layout_insights = dbc.Tabs(
                                                                 ],
                                                                 style={'height': '7rem', 'width': '7rem', 'position': 'relative', 'top': '0rem'},
                                                                 className='image-border-bottom',
-                                                                color=colors['bolus'][:-2] + str(min((hypos_bolus_avg_after[i]) / 8, 1)) + ')',
+                                                                color=colors['bolus'][:-2] + str(min((hypos_bolus_avg_after[i]) / 5, 1)) + ')',
                                                                 id={'type': 'insights_hypos_card_bolus_avg_after', 'index': i}
                                                             ),
                                                         ],
@@ -1841,29 +1841,6 @@ layout_insights = dbc.Tabs(
                                         ),
                                     ]
                                 ),
-
-                                ################################################################################
-                                # HYPO INSIGHTS: FILTER SLIDER MEAL SIZE
-                                ################################################################################
-                                dbc.Label("Meal size", style={'padding': '10% 0 0', 'font-weight': 'bold'}, html_for="range-slider-meal-size"),
-                                dcc.RangeSlider(id="insights_hypos_range_slider_meal_size",
-                                                min=40,
-                                                max=150,
-                                                step=10,
-                                                marks={
-                                                    0: '0 g',
-                                                    25: '25 g',
-                                                    50: '50 g',
-                                                    75: '75 g',
-                                                    100: '100 g',
-                                                    125: '125 g',
-                                                    150: '150 g',
-                                                },
-                                                value=[0, 150],
-                                                tooltip={"placement": "bottom", "always_visible": True},
-                                                ),
-                                html.Div(style={'padding': '0% 0 10%'}),
-
                                 ################################################################################
                                 # HYPO INSIGHTS: APPLY BUTTON
                                 ################################################################################

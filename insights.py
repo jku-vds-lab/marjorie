@@ -561,6 +561,9 @@ def get_logs_hypos(start_date, end_date, time_before, time_after):
     hypo_starts = df_logs.timestamp.loc[indices[0]]
     logs_hypos = pd.DataFrame(list(hypo_starts - timedelta(hours=time_before)), columns=['start_date'])
     logs_hypos['end_date'] = list(hypo_starts + timedelta(hours=time_after))
+    min_hour = logs_hypos.start_date.dt.hour
+    logs_hypos['time_of_day'] = min_hour.map(times_of_day)
+    hypo_starts = logs_hypos.start_date
     return logs_hypos, hypo_starts
 
 
@@ -742,15 +745,23 @@ def get_insight_data_meals(filter_time_of_day=None, filter_meal_size=None):
 
     return n_clusters_, graphs_meal_overview, graphs_all_curves, graphs_insights_meals, start_bgs, time_between, carbs_sums, end_bgs, bolus_sums
 
-def get_insight_data_hypos(filter_time_of_day=None, filter_meal_size=None):
+
+def get_insight_data_hypos(filter_time_of_day=None):
     logs_hypos, hypo_starts = get_logs_hypos(start_date_insights, end_date, time_before_hypo, time_after_hypo)
     dataset_unfiltered, _ = get_dataset(logs_hypos)
+
+    if filter_time_of_day:
+        logs_hypos = filter_function_time_of_day(logs_hypos, filter_time_of_day)
+        hypo_starts = logs_hypos['start_date']
+
     indices = {}
     for logs, log_type in zip([logs_sgv, logs_insulin, logs_carbs], ['sgv', 'insulin', 'carbs']):
-        # indices[log_type] = [get_log_indices(logs, logs_activities.start_date), get_log_indices(logs, logs_activities.end_date)]
         indices[log_type] = [get_log_indices(logs, logs_hypos.start_date), get_log_indices(logs, logs_hypos.end_date)]
+    dataset_clusters, _ = get_dataset(logs_hypos)
 
-    dataset_clusters = get_insight_dataset(*indices['sgv'])
+    if not dataset_clusters:
+        n_clusters = 0
+        return [n_clusters] + [None] * 8
     clusters = get_insight_clusters(dataset_clusters)
     n_clusters_ = len(np.unique(clusters))
 

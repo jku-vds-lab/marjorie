@@ -6,7 +6,8 @@ from dash import dcc, html, ctx
 from aggregations import draw_seasonal_graph_day, draw_full_agp
 from colors import colors_heatmap, colors, targets_heatmap, get_prebolus_button_color
 from daily import draw_daily_plot
-from insights import get_time_of_day_from_number, get_logs_meals, get_dataset, filter_function_time_of_day, filter_function_meal_size, get_curve_overview_plot, get_insight_data_meals
+from insights import get_time_of_day_from_number, get_logs_meals, get_dataset, filter_function_time_of_day, filter_function_meal_size, get_curve_overview_plot, get_insight_data_meals, get_insight_data_hypos, \
+    get_logs_hypos
 from layout import app, layout_daily, layout_agp, layout_overview, layout_insights
 from dash_extensions.enrich import Output, DashProxy, Input, MultiplexerTransform, State, callback_context, ALL
 
@@ -14,7 +15,7 @@ from overview import draw_horizon_graph, get_daily_data, get_x_range_for_day, dr
 from statistics import get_tir_plot, get_statistics_day, get_statistics_days
 from helpers import convert_datestring, get_df_between_dates, get_tir, get_statistics, check_timebox, get_log_indices, calculate_tir_time, get_df_of_date, get_mean_per_day
 from preprocessing import dates, logs_sgv, date_max, date_min, start_date, end_date, sgv_array_for_agp, date_dict, logs_carbs, logs_insulin, logs_br_default, start_date_insights
-from variables import num_horizon_graphs, num_insight_patterns, time_before_meal, time_after_meal
+from variables import num_horizon_graphs, num_insight_patterns, time_before_meal, time_after_meal, time_after_hypo, time_before_hypo
 import re
 
 
@@ -515,7 +516,6 @@ def overview_weekday_buttons(*args):
     Output({'type': 'insights_meals_card_bolus', 'index': ALL}, 'color'),
     Output({'type': 'insights_meals_card_factor', 'index': ALL}, 'color'),
     Output({'type': 'insights_meals_pattern_card', 'index': ALL}, 'style'),
-    # Output('n_patterns_meals', 'children')
 )
 def update_insights_meals(_, time_of_day_filter, meal_size_filter):
     time_of_day_filter = get_time_of_day_from_number(time_of_day_filter)
@@ -555,6 +555,68 @@ def update_insights_meals(_, time_of_day_filter, meal_size_filter):
 
         no_update = [dash.no_update] * num_insight_patterns
         return figure, False, *no_update, *no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update
+
+
+@app.callback(
+    Input('insights_hypos_filter_apply_btn', 'n_clicks'),
+    Input('insights_hypos_checklist_time_of_day', 'value'),
+    Output('insights_hypos_graph_all_curves', 'figure'),
+    Output('insights_hypos_filter_apply_btn', 'disabled'),
+    *[Output('insights_hypos_bar_graph_{}'.format(i), 'figure') for i in range(num_insight_patterns)],
+    *[Output('insights_hypos_overview_graph_{}'.format(i), 'figure') for i in range(num_insight_patterns)],
+    Output({'type': 'insights_hypos_sgv_before', 'index': ALL}, 'children'),
+    Output({'type': 'insights_hypos_sgv_after', 'index': ALL}, 'children'),
+    Output({'type': 'insights_hypos_carb_avg_before', 'index': ALL}, 'children'),
+    Output({'type': 'insights_hypos_carb_avg_after', 'index': ALL}, 'children'),
+    Output({'type': 'insights_hypos_bolus_avg_before', 'index': ALL}, 'children'),
+    Output({'type': 'insights_hypos_bolus_avg_after', 'index': ALL}, 'children'),
+    Output({'type': 'insights_hypos_card_sgv_before', 'index': ALL}, 'color'),
+    Output({'type': 'insights_hypos_card_sgv_after', 'index': ALL}, 'color'),
+    Output({'type': 'insights_hypos_card_carb_avg_before', 'index': ALL}, 'color'),
+    Output({'type': 'insights_hypos_card_carb_avg_after', 'index': ALL}, 'color'),
+    Output({'type': 'insights_hypos_card_bolus_avg_before', 'index': ALL}, 'color'),
+    Output({'type': 'insights_hypos_card_bolus_avg_after', 'index': ALL}, 'color'),
+    Output({'type': 'insights_hypos_pattern_card', 'index': ALL}, 'style'),
+)
+def update_insights_hypos(_, time_of_day_filter):
+    time_of_day_filter = get_time_of_day_from_number(time_of_day_filter)
+    triggered_id = ctx.triggered_id
+
+    if triggered_id == 'insights_hypos_filter_apply_btn':
+        print('##############################################')
+        hypos_n_clusters_, hypos_bar_graphs, hypos_graph_all_curves, hypos_graphs_insights, hypos_start_bgs, hypos_end_bgs, hypos_carb_avg_before, hypos_carb_avg_after, hypos_bolus_avg_before, \
+        hypos_bolus_avg_after = get_insight_data_hypos(filter_time_of_day=time_of_day_filter)
+
+        color_sgv_before = [colors_heatmap[list(np.array(targets_heatmap) > bg).index(True) - 1] for bg in hypos_start_bgs]
+        color_sgv_after = [colors_heatmap[list(np.array(targets_heatmap) > bg).index(True) - 1] for bg in hypos_end_bgs]
+        color_carb_avg_before = [colors['carbs'][:-2] + str(min((item - 20) / 60, 1)) + ')' for item in hypos_carb_avg_before]
+        color_carb_avg_after = [colors['carbs'][:-2] + str(min((item - 20) / 60, 1)) + ')' for item in hypos_carb_avg_after]
+        color_bolus_avg_before = [colors['bolus'][:-2] + str(min((item - 5) / 5, 1)) + ')' for item in hypos_bolus_avg_before]
+        color_bolus_avg_after = [colors['bolus'][:-2] + str(min((item - 5) / 5, 1)) + ')' for item in hypos_bolus_avg_after]
+
+        hypos_carb_avg_before = [str(round(c)) for c in hypos_carb_avg_before]
+        hypos_carb_avg_after = [str(round(c)) for c in hypos_carb_avg_after]
+        hypos_bolus_avg_before = [str(round(b, 1)) for b in hypos_bolus_avg_before]
+        hypos_bolus_avg_after = [str(round(b, 1)) for b in hypos_bolus_avg_after]
+
+        styles = [{'display': 'inline'}] * hypos_n_clusters_ + [{'display': 'none'}] * (num_insight_patterns - hypos_n_clusters_)
+
+        n_patterns_text = '{} patterns were found.'.format(hypos_n_clusters_)
+        print(n_patterns_text)
+        return dash.no_update, True, *hypos_bar_graphs, *hypos_graphs_insights, hypos_start_bgs, hypos_end_bgs, hypos_carb_avg_before, hypos_carb_avg_after, hypos_bolus_avg_before, hypos_bolus_avg_after, color_sgv_before, color_sgv_after, color_carb_avg_before, \
+               color_carb_avg_after, color_bolus_avg_before, color_bolus_avg_after, styles
+    else:
+        logs_hypos, hypo_starts = get_logs_hypos(start_date_insights, end_date, time_before_hypo, time_after_hypo)
+        dataset_unfiltered, _ = get_dataset(logs_hypos)
+        print(time_of_day_filter)
+        logs_hypos = filter_function_time_of_day(logs_hypos, time_of_day_filter)
+
+        dataset_clusters, _ = get_dataset(logs_hypos)
+        figure = get_curve_overview_plot(dataset_clusters, dataset_unfiltered)
+
+        no_update = [dash.no_update] * num_insight_patterns
+        return figure, False, *no_update, *no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update
+
 
 
 if __name__ == '__main__':
