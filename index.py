@@ -1,14 +1,15 @@
 from datetime import timedelta, datetime, date
 import dash
 import numpy as np
-from dash import dcc, html, ctx
+from dash import dcc, html, ctx, MATCH
 
 from aggregations import draw_seasonal_graph_day, draw_full_agp
+from assets.styles import buttons_style_agp_date
 from colors import colors_heatmap, colors, targets_heatmap, get_prebolus_button_color
 from daily import draw_daily_plot
 from insights import get_time_of_day_from_number, get_logs_meals, get_dataset, filter_function_time_of_day, filter_function_meal_size, get_curve_overview_plot, get_insight_data_meals, get_insight_data_hypos, \
     get_logs_hypos
-from layout import app, layout_daily, layout_agp, layout_overview, layout_insights
+from layout import app, layout_daily, layout_agp, layout_overview, layout_insights, create_horizon_graph
 from dash_extensions.enrich import Output, DashProxy, Input, MultiplexerTransform, State, callback_context, ALL
 
 from overview import draw_horizon_graph, get_daily_data, get_x_range_for_day, draw_overview_daily_curve_detailed
@@ -17,6 +18,7 @@ from helpers import convert_datestring, get_df_between_dates, get_tir, get_stati
 from preprocessing import dates, logs_sgv, date_max, date_min, start_date, end_date, sgv_array_for_agp, date_dict, logs_carbs, logs_insulin, logs_br_default, start_date_insights
 from variables import num_horizon_graphs, num_insight_patterns, time_before_meal, time_after_meal, time_after_hypo, time_before_hypo
 import re
+import dash_bootstrap_components as dbc
 
 
 @app.callback(Output("page-content", "children"), [Input("url", "pathname")], prevent_initial_call=True)
@@ -255,63 +257,47 @@ def agp_weekday_buttons(*args):
         stats_plot = dash.no_update
 
     return stats_ea1c, \
-           stats_mean,\
-           stats_std,\
-           stats_tir_0,\
-           stats_tir_1,\
-           stats_tir_2,\
-           stats_tir_3,\
-           stats_tir_4,\
-           stats_time_0,\
-           stats_time_1,\
-           stats_time_2,\
-           stats_time_3,\
-           stats_time_4,\
-           stats_carbs,\
-           stats_bolus,\
-           stats_basal,\
-           stats_plot,\
+           stats_mean, \
+           stats_std, \
+           stats_tir_0, \
+           stats_tir_1, \
+           stats_tir_2, \
+           stats_tir_3, \
+           stats_tir_4, \
+           stats_time_0, \
+           stats_time_1, \
+           stats_time_2, \
+           stats_time_3, \
+           stats_time_4, \
+           stats_carbs, \
+           stats_bolus, \
+           stats_basal, \
+           stats_plot, \
            agp_figure, \
            *state
+
 
 ################################################################################
 # CALLBACKS OVERVIEW
 ################################################################################
 
 @app.callback(
-    *[Input('overview_btn_horizon_expand-{}-'.format(i), 'n_clicks') for i in range(num_horizon_graphs)],
-    *[Output('overview_horizon_graph_{}'.format(i), 'figure') for i in range(num_horizon_graphs)],
-    *[Output('overview_btn_horizon_expand-{}-'.format(i), 'children') for i in range(num_horizon_graphs)],
-    *[State('pattern_details_date_{}'.format(i), 'children') for i in range(num_horizon_graphs)],
-    [State('overview_horizon_graph_{}'.format(i), 'figure') for i in range(num_horizon_graphs)],
+    Output({'type': 'horizon_graph', 'index': MATCH}, 'figure'),
+    Output({"type": "btn_horizon_graph_expand", "index": MATCH}, 'children'),
+    Input({"type": "btn_horizon_graph_expand", "index": MATCH}, 'n_clicks'),
+    State({'type': 'horizon_date_info', 'index': MATCH}, 'children'),
+    State({'type': 'horizon_graph', 'index': MATCH}, 'figure'),
     prevent_initial_call=True
 )
-def overview_expand_button_click(*args):
-    dates = args[num_horizon_graphs:2 * num_horizon_graphs]
-    figures = args[2 * num_horizon_graphs:]
-    dates = [datetime.strptime(date, '%d/%m/%Y') if len(date) > 0 else '' for date in dates]
-    context = callback_context.triggered
-    if context:
-        # value = context[0]['value']
-        clicked = int(re.search('-(.*)-', context[0]['prop_id']).group(1))
-        day = dates[clicked].date()
-
-        # if (value % 2) == 0:
-        if figures[clicked]['layout']['height'] > 100:
-            figure = draw_horizon_graph(*get_daily_data(day), x_range=get_x_range_for_day(day))
-            button = html.Span([html.I(className="fas fa-caret-down fa-2x")])
-        else:
-            figure = draw_overview_daily_curve_detailed(*get_daily_data(day), x_range=get_x_range_for_day(day))
-            button = html.Span([html.I(className="fas fa-caret-up fa-2x")])
-
-        figures = [dash.no_update] * clicked + [figure] + [dash.no_update] * (num_horizon_graphs - clicked - 1)
-        buttons = [dash.no_update] * clicked + [button] + [dash.no_update] * (num_horizon_graphs - clicked - 1)
-
+def overview_expand_button_click(_, day, figure):
+    day = datetime.strptime(day, '%d/%m/%Y').date()
+    if figure['layout']['height'] > 100:
+        graph = draw_horizon_graph(*get_daily_data(day), x_range=get_x_range_for_day(day))
+        button = html.Span([html.I(className="fas fa-caret-down fa-2x")])
     else:
-        figures = [dash.no_update] * num_horizon_graphs
-        buttons = [dash.no_update] * num_horizon_graphs
-
-    return *figures, *buttons
+        graph = draw_overview_daily_curve_detailed(*get_daily_data(day), x_range=get_x_range_for_day(day))
+        button = html.Span([html.I(className="fas fa-caret-up fa-2x")])
+    return graph, button
 
 
 @app.callback(
@@ -335,17 +321,17 @@ def overview_expand_button_click(*args):
     Output('overview_stats_basal', 'children'),
     Output('overview_stats_tir_graph', 'figure'),
     Output('overview_agp_graph', 'figure'),
-    *[Output('pattern_details_date_{}'.format(i), 'children') for i in range(num_horizon_graphs)],
-    *[Output('pattern_detail_agp_div_{}'.format(i), 'style') for i in range(num_horizon_graphs)],
-    *[Output('btn_agp_date-{}-'.format(i), 'children') for i in range(num_horizon_graphs)],
-    *[Output('overview_horizon_graph_{}'.format(i), 'figure') for i in range(num_horizon_graphs)],
-    # prevent_initial_call=True
+    Output('overview_horizon_graphs', 'children')
 )
 def overview_update_dates(date_start, date_end):
     stats, tir, carbs_sum, bolus_sum, basal_sum = get_statistics_days(date_start, date_end)
     date_start_dt = convert_datestring(date_start).date()
     date_end_dt = convert_datestring(date_end).date()
     days_horizon_graphs = [date for date in dates if (date_start_dt <= date <= date_end_dt)]
+
+    horizon_card_content = []
+    for id, date in enumerate(days_horizon_graphs):
+        horizon_card_content.append(create_horizon_graph(id, date))
 
     return str(round(stats['ea1c'], 1)), \
            str(int(stats['mean'])), \
@@ -365,10 +351,7 @@ def overview_update_dates(date_start, date_end):
            basal_sum, \
            get_tir_plot(tir), \
            draw_seasonal_graph_day(date_start, date_end), \
-           *[days_horizon_graphs[i].strftime('%d/%m/%Y') for i in range(len(days_horizon_graphs))] + [''] * (num_horizon_graphs - len(days_horizon_graphs)), \
-           *[{'display': 'inline'}] * min(num_horizon_graphs, len(days_horizon_graphs)) + [{'display': 'none'}] * (num_horizon_graphs - len(days_horizon_graphs)), \
-           *[days_horizon_graphs[i].strftime('%a, %d/%m') for i in range(len(days_horizon_graphs))] + [''] * (num_horizon_graphs - len(days_horizon_graphs)), \
-           *[draw_horizon_graph(*get_daily_data(day), x_range=get_x_range_for_day(day)) for day in days_horizon_graphs] + [dash.no_update] * (num_horizon_graphs - len(days_horizon_graphs))
+           horizon_card_content
 
 
 @app.callback(
@@ -390,112 +373,112 @@ def overview_quick_date_buttons(n_clicks):
 def overview_open_weekly_stats(_):
     return True
 
-@app.callback(
-    [Input('overview_weekday_button-{}-'.format(i), 'n_clicks') for i in range(7)],
-    [State('overview_weekday_button-{}-'.format(i), 'active') for i in range(7)],
-    State('overview_date-picker-range', 'start_date'),
-    State('overview_date-picker-range', 'end_date'),
-    Output('overview_stats_sgv_ea1c', 'children'),
-    Output('overview_stats_sgv_mean', 'children'),
-    Output('overview_stats_sgv_std', 'children'),
-    Output('overview_stats_very_low', 'children'),
-    Output('overview_stats_low', 'children'),
-    Output('overview_stats_target', 'children'),
-    Output('overview_stats_high', 'children'),
-    Output('overview_stats_very_high', 'children'),
-    Output('overview_stats_very_low_time', 'children'),
-    Output('overview_stats_low_time', 'children'),
-    Output('overview_stats_target_time', 'children'),
-    Output('overview_stats_high_time', 'children'),
-    Output('overview_stats_very_high_time', 'children'),
-    Output('overview_stats_carbs', 'children'),
-    Output('overview_stats_bolus', 'children'),
-    Output('overview_stats_basal', 'children'),
-    Output('overview_stats_tir_graph', 'figure'),
-    Output('overview_agp_graph', 'figure'),
-    *[Output('pattern_detail_agp_div_{}'.format(i), 'style') for i in range(num_horizon_graphs)],
-    [Output('overview_weekday_button-{}-'.format(i), 'active') for i in range(7)],
-    prevent_initial_call=True
 
-)
-def overview_weekday_buttons(*args):
-    state = args[7:14]
-    date_start = args[-2]
-    date_end = args[-1]
-    context = callback_context.triggered
-    if context:
-        clicked = int(re.search('-(.*)-', context[0]['prop_id']).group(1))
-        state = [dash.no_update] * clicked + [not state[clicked]] + [dash.no_update] * (7 - clicked - 1)
-        weekday_filter = np.where(np.array(state))[0]
-        # agp_figure = draw_full_agp(date_start, date_end, weekday_filter)
-        stats, tir, carbs_sum, bolus_sum, basal_sum = get_statistics_days(date_start, date_end, weekday_filter)
-        stats_ea1c = str(round(stats['ea1c'], 1))
-        stats_mean = str(int(stats['mean']))
-        stats_std = str(int(stats['std'] / stats['mean'] * 100))
-        stats_tir_0 = str(tir[0])
-        stats_tir_1 = str(tir[1])
-        stats_tir_2 = str(tir[2])
-        stats_tir_3 = str(tir[3])
-        stats_tir_4 = str(tir[4])
-        stats_time_0 = calculate_tir_time(tir[0])
-        stats_time_1 = calculate_tir_time(tir[1])
-        stats_time_2 = calculate_tir_time(tir[2])
-        stats_time_3 = calculate_tir_time(tir[3])
-        stats_time_4 = calculate_tir_time(tir[4])
-        stats_carbs = carbs_sum
-        stats_bolus = bolus_sum
-        stats_basal = basal_sum
-        stats_plot = get_tir_plot(tir)
-
-        overview_agp_graph = draw_seasonal_graph_day(date_start, date_end, weekday_filter)
-
-        date_start_dt = convert_datestring(date_start).date()
-        date_end_dt = convert_datestring(date_end).date()
-        days_horizon_graphs = [date for date in dates if (date_start_dt <= date <= date_end_dt)]
-        styles = [{'display': 'inline'} if (date.weekday() in weekday_filter) else {'display': 'none'} for date in days_horizon_graphs] + [{'display': 'none'}] * (num_horizon_graphs - len(days_horizon_graphs))
-
-    else:
-        state = [dash.no_update] * 7
-        stats_ea1c = dash.no_update
-        stats_mean = dash.no_update
-        stats_std = dash.no_update
-        stats_tir_0 = dash.no_update
-        stats_tir_1 = dash.no_update
-        stats_tir_2 = dash.no_update
-        stats_tir_3 = dash.no_update
-        stats_tir_4 = dash.no_update
-        stats_time_0 = dash.no_update
-        stats_time_1 = dash.no_update
-        stats_time_2 = dash.no_update
-        stats_time_3 = dash.no_update
-        stats_time_4 = dash.no_update
-        stats_carbs = dash.no_update
-        stats_bolus = dash.no_update
-        stats_basal = dash.no_update
-        stats_plot = dash.no_update
-        overview_agp_graph = dash.no_update
-        styles = dash.no_update
-
-    return stats_ea1c, \
-           stats_mean,\
-           stats_std,\
-           stats_tir_0,\
-           stats_tir_1,\
-           stats_tir_2,\
-           stats_tir_3,\
-           stats_tir_4,\
-           stats_time_0,\
-           stats_time_1,\
-           stats_time_2,\
-           stats_time_3,\
-           stats_time_4,\
-           stats_carbs,\
-           stats_bolus,\
-           stats_basal,\
-           stats_plot,\
-           overview_agp_graph, \
-           *styles, \
-           *state
+# @app.callback(
+#     [Input('overview_weekday_button-{}-'.format(i), 'n_clicks') for i in range(7)],
+#     [State('overview_weekday_button-{}-'.format(i), 'active') for i in range(7)],
+#     State('overview_date-picker-range', 'start_date'),
+#     State('overview_date-picker-range', 'end_date'),
+#     Output('overview_stats_sgv_ea1c', 'children'),
+#     Output('overview_stats_sgv_mean', 'children'),
+#     Output('overview_stats_sgv_std', 'children'),
+#     Output('overview_stats_very_low', 'children'),
+#     Output('overview_stats_low', 'children'),
+#     Output('overview_stats_target', 'children'),
+#     Output('overview_stats_high', 'children'),
+#     Output('overview_stats_very_high', 'children'),
+#     Output('overview_stats_very_low_time', 'children'),
+#     Output('overview_stats_low_time', 'children'),
+#     Output('overview_stats_target_time', 'children'),
+#     Output('overview_stats_high_time', 'children'),
+#     Output('overview_stats_very_high_time', 'children'),
+#     Output('overview_stats_carbs', 'children'),
+#     Output('overview_stats_bolus', 'children'),
+#     Output('overview_stats_basal', 'children'),
+#     Output('overview_stats_tir_graph', 'figure'),
+#     Output('overview_agp_graph', 'figure'),
+#     *[Output('pattern_detail_agp_div_{}'.format(i), 'style') for i in range(num_horizon_graphs)],
+#     [Output('overview_weekday_button-{}-'.format(i), 'active') for i in range(7)],
+#     prevent_initial_call=True
+# )
+# def overview_weekday_buttons(*args):
+#     state = args[7:14]
+#     date_start = args[-2]
+#     date_end = args[-1]
+#     context = callback_context.triggered
+#     if context:
+#         clicked = int(re.search('-(.*)-', context[0]['prop_id']).group(1))
+#         state = [dash.no_update] * clicked + [not state[clicked]] + [dash.no_update] * (7 - clicked - 1)
+#         weekday_filter = np.where(np.array(state))[0]
+#         # agp_figure = draw_full_agp(date_start, date_end, weekday_filter)
+#         stats, tir, carbs_sum, bolus_sum, basal_sum = get_statistics_days(date_start, date_end, weekday_filter)
+#         stats_ea1c = str(round(stats['ea1c'], 1))
+#         stats_mean = str(int(stats['mean']))
+#         stats_std = str(int(stats['std'] / stats['mean'] * 100))
+#         stats_tir_0 = str(tir[0])
+#         stats_tir_1 = str(tir[1])
+#         stats_tir_2 = str(tir[2])
+#         stats_tir_3 = str(tir[3])
+#         stats_tir_4 = str(tir[4])
+#         stats_time_0 = calculate_tir_time(tir[0])
+#         stats_time_1 = calculate_tir_time(tir[1])
+#         stats_time_2 = calculate_tir_time(tir[2])
+#         stats_time_3 = calculate_tir_time(tir[3])
+#         stats_time_4 = calculate_tir_time(tir[4])
+#         stats_carbs = carbs_sum
+#         stats_bolus = bolus_sum
+#         stats_basal = basal_sum
+#         stats_plot = get_tir_plot(tir)
+#
+#         overview_agp_graph = draw_seasonal_graph_day(date_start, date_end, weekday_filter)
+#
+#         date_start_dt = convert_datestring(date_start).date()
+#         date_end_dt = convert_datestring(date_end).date()
+#         days_horizon_graphs = [date for date in dates if (date_start_dt <= date <= date_end_dt)]
+#         styles = [{'display': 'inline'} if (date.weekday() in weekday_filter) else {'display': 'none'} for date in days_horizon_graphs] + [{'display': 'none'}] * (num_horizon_graphs - len(days_horizon_graphs))
+#
+#     else:
+#         state = [dash.no_update] * 7
+#         stats_ea1c = dash.no_update
+#         stats_mean = dash.no_update
+#         stats_std = dash.no_update
+#         stats_tir_0 = dash.no_update
+#         stats_tir_1 = dash.no_update
+#         stats_tir_2 = dash.no_update
+#         stats_tir_3 = dash.no_update
+#         stats_tir_4 = dash.no_update
+#         stats_time_0 = dash.no_update
+#         stats_time_1 = dash.no_update
+#         stats_time_2 = dash.no_update
+#         stats_time_3 = dash.no_update
+#         stats_time_4 = dash.no_update
+#         stats_carbs = dash.no_update
+#         stats_bolus = dash.no_update
+#         stats_basal = dash.no_update
+#         stats_plot = dash.no_update
+#         overview_agp_graph = dash.no_update
+#         styles = dash.no_update
+#
+#     return stats_ea1c, \
+#            stats_mean,\
+#            stats_std,\
+#            stats_tir_0,\
+#            stats_tir_1,\
+#            stats_tir_2,\
+#            stats_tir_3,\
+#            stats_tir_4,\
+#            stats_time_0,\
+#            stats_time_1,\
+#            stats_time_2,\
+#            stats_time_3,\
+#            stats_time_4,\
+#            stats_carbs,\
+#            stats_bolus,\
+#            stats_basal,\
+#            stats_plot,\
+#            overview_agp_graph, \
+#            *styles, \
+#            *state
 
 
 ################################################################################
@@ -622,7 +605,6 @@ def update_insights_hypos(_, time_of_day_filter):
 
         no_update = [dash.no_update] * num_insight_patterns
         return figure, False, *no_update, *no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update
-
 
 
 if __name__ == '__main__':

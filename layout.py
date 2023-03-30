@@ -773,6 +773,61 @@ layout_agp = html.Div(
     ]
 )
 
+def create_horizon_graph(id, day):
+    horizon_graph = html.Div(
+        id={"index": id, "type": "horizon_card"},
+        children=
+        dbc.Row(
+            [
+                dbc.Col(
+                    [
+                        html.Button(children=day.strftime('%a, %m/%d'),
+                                    id={"index": id, "type": "horizon_date_displayed"},
+                                    n_clicks=0,
+                                    style=buttons_style_agp_date
+                                    ),
+                        html.Div(day.strftime('%d/%m/%Y'), style={'display': 'none'}, id={"index": id, "type": "horizon_date_info"}, ),
+                    ],
+                    width=1,
+                ),
+                dbc.Col(
+                    dcc.Graph(
+                        # figure={},
+                        figure=draw_horizon_graph(*get_daily_data(day), x_range=get_x_range_for_day(day)),
+                        id={"index": id, "type": "horizon_graph"},
+                        config={
+                            'displayModeBar': False
+                        },
+                    )
+                ),
+                dbc.Col(
+                    [
+                        dbc.Button(children=html.Span([html.I(className="fas fa-caret-down fa-2x")]),
+                                   color="secondary",
+                                   className="btn button-icon d-flex align-items-center",
+                                   size="sm",
+                                   style={'height': '2rem', 'width': '2rem'},
+                                   outline=True,
+                                   id={"index": id, "type": "btn_horizon_graph_expand"}, n_clicks=0),
+
+                        dbc.Button(children=html.Span([html.I(className="fas fa-eye-slash fa-1x")]),
+                                   color="secondary",
+                                   className="btn button-icon d-flex align-items-center",
+                                   size="sm",
+                                   style={'height': '2rem', 'width': '2rem', 'position': 'relative', 'left': '2.2rem', 'top': '-2rem'},
+                                   outline=True,
+                                   id={"index": id, "type": "btn_horizon_graph_hide"},
+                                   n_clicks=0
+                                   ),
+                    ],
+                    width=1
+                )
+            ],
+        ),
+        style={'display': 'inline'}
+    )
+    return horizon_graph
+
 days_horizon_graphs = [date for date in dates if (start_date.date() <= date <= end_date.date())]
 layout_overview = html.Div(
     [
@@ -900,119 +955,7 @@ layout_overview = html.Div(
                             ################################################################################
                             dbc.Card(
                                 id='overview_horizon_graphs',
-                                children=[
-                                             html.Div(
-                                                 id='pattern_detail_agp_div_{}'.format(i),
-                                                 children=
-                                                 dbc.Row(
-                                                     [
-                                                         dbc.Col(
-                                                             [
-                                                                 html.Button(children=days_horizon_graphs[i].strftime('%a, %m/%d'),
-                                                                             id='btn_agp_date-{}-'.format(i),
-                                                                             n_clicks=0,
-                                                                             style=buttons_style_agp_date
-                                                                             ),
-                                                                 html.Div(days_horizon_graphs[i].strftime('%d/%m/%Y'), style={'display': 'none'}, id='pattern_details_date_{}'.format(i)),
-                                                             ],
-                                                             width=1,
-                                                             # style={'position': 'absolute', 'left': '5rem'}
-                                                         ),
-                                                         dbc.Col(
-                                                             dcc.Graph(
-                                                                 # figure={},
-                                                                 figure=draw_horizon_graph(*get_daily_data(days_horizon_graphs[i]), x_range=get_x_range_for_day(days_horizon_graphs[i])),
-                                                                 id='overview_horizon_graph_{}'.format(i),
-                                                                 config={
-                                                                     'displayModeBar': False
-                                                                 },
-                                                                 # style={'position': 'absolute', 'left': '100px'}
-                                                             )
-                                                         ),
-                                                         dbc.Col(
-                                                             [
-                                                                 dbc.Button(children=html.Span([html.I(className="fas fa-caret-down fa-2x")]),
-                                                                            color="secondary",
-                                                                            className="btn button-icon d-flex align-items-center",
-                                                                            size="sm",
-                                                                            style={'height': '2rem', 'width': '2rem'},
-                                                                            outline=True,
-                                                                            id='overview_btn_horizon_expand-{}-'.format(i), n_clicks=0),
-
-                                                                 dbc.Button(children=html.Span([html.I(className="fas fa-eye-slash fa-1x")]),
-                                                                            color="secondary",
-                                                                            className="btn button-icon d-flex align-items-center",
-                                                                            size="sm",
-                                                                            style={'height': '2rem', 'width': '2rem', 'position': 'relative', 'left': '2.2rem', 'top': '-2rem'},
-                                                                            outline=True,
-                                                                            id='btn_agp_visible-{}-'.format(i),
-                                                                            n_clicks=0
-                                                                            ),
-                                                             ],
-                                                             width=1
-                                                         )
-                                                     ],
-                                                 ),
-                                                 style={'display': 'inline'}
-                                             )
-                                             for i in range(initial_number_of_days)
-                                         ]
-                                         + [
-                                             html.Div(
-                                                 id='pattern_detail_agp_div_{}'.format(i),
-                                                 children=
-                                                 dbc.Row(
-                                                     [
-                                                         dbc.Col(
-                                                             [
-                                                                 html.Button(children='',
-                                                                             id='btn_agp_date-{}-'.format(i),
-                                                                             n_clicks=0,
-                                                                             style=buttons_style_agp_date),
-                                                                 html.Div('', style={'display': 'none'}, id='pattern_details_date_{}'.format(i)),
-                                                             ],
-                                                         ),
-                                                         dbc.Col(
-                                                             dcc.Graph(
-                                                                 # figure=draw_pattern_detail_plot(date_max.date()),
-                                                                 figure={},
-                                                                 # figure=draw_pattern_detail_plot(*get_daily_data(days_pattern_detail[i]), x_range=get_x_range_for_day(days_pattern_detail[i])),
-                                                                 id='overview_horizon_graph_{}'.format(i),
-                                                                 config={
-                                                                     'displayModeBar': False
-                                                                 },
-                                                                 # style={'padding': '0% 0% 0% 14px'}
-                                                             )
-                                                         ),
-                                                         dbc.Col(
-                                                             [
-                                                                 dbc.Button(children=html.Span([html.I(className="fas fa-caret-down fa-2x")]),
-                                                                            color="secondary",
-                                                                            className="btn button-icon d-flex align-items-center",
-                                                                            size="sm",
-                                                                            style={'height': '2rem', 'width': '2rem'},
-                                                                            outline=True,
-                                                                            id='overview_btn_horizon_expand-{}-'.format(i), n_clicks=0),
-                                                                 dbc.Button(children=html.Span([html.I(className="fas fa-eye-slash fa-1x")]),
-                                                                            color="secondary",
-                                                                            className="btn button-icon d-flex align-items-center",
-                                                                            size="sm",
-                                                                            style={'height': '2rem', 'width': '2rem', 'position': 'relative', 'left': '2.2rem', 'top': '-2rem'},
-                                                                            outline=True,
-                                                                            id='btn_agp_visible-{}-'.format(i),
-                                                                            n_clicks=0
-                                                                            ),
-                                                             ],
-                                                             width=1
-                                                         )
-                                                     ],
-                                                 ),
-                                                 style={'display': 'none'}
-                                             )
-                                             for i in range(initial_number_of_days, num_horizon_graphs)
-                                         ]
-
-                                ,
+                                children=[create_horizon_graph(id, date) for id, date in enumerate(days_horizon_graphs)],
                                 style={'display': 'block'},
                                 color='white',
                                 outline=True,
