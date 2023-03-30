@@ -92,7 +92,9 @@ layout_daily = html.Div(
                             id='daily_graph'
                         ),
                     )
-                ]
+                ],
+                className='image-border',
+                style={'padding': '0 2em'}
             ),
             width=8,
             md=8,
@@ -917,7 +919,6 @@ layout_overview = html.Div(
                                                          ),
                                                          dbc.Col(
                                                              dcc.Graph(
-                                                                 # figure=draw_pattern_detail_plot(date_max.date()),
                                                                  # figure={},
                                                                  figure=draw_horizon_graph(*get_daily_data(days_horizon_graphs[i]), x_range=get_x_range_for_day(days_horizon_graphs[i])),
                                                                  id='overview_horizon_graph_{}'.format(i),

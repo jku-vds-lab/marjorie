@@ -124,6 +124,7 @@ def daily_date_button_forward(n_clicks, current_date):
     Output('agp_stats_basal', 'children'),
     Output('agp_stats_tir_graph', 'figure'),
     Output('agp_graph', 'figure'),
+    prevent_initial_call=True
 )
 def agp_update_dates(date_start, date_end):
     stats, tir, carbs_sum, bolus_sum, basal_sum = get_statistics_days(date_start, date_end)
@@ -152,6 +153,7 @@ def agp_update_dates(date_start, date_end):
     Input({'type': 'agp_quick_date_button', 'index': ALL}, 'n_clicks'),
     Output('agp_date-picker-range', 'start_date'),
     Output('agp_date-picker-range', 'end_date'),
+    prevent_initial_call=True
 )
 def agp_quick_date_buttons(n_clicks):
     triggered_id = ctx.triggered_id
@@ -160,7 +162,8 @@ def agp_quick_date_buttons(n_clicks):
 
 @app.callback(
     Input('agp_explore_button', 'n_clicks'),
-    Output("page-content", "children")
+    Output("page-content", "children"),
+    prevent_initial_call=True
 )
 def explore_days_in_detail_button(_):
     return layout_overview
@@ -198,6 +201,7 @@ def agp_open_weekly_stats(_):
     Output('agp_stats_tir_graph', 'figure'),
     Output('agp_graph', 'figure'),
     [Output('agp_weekday_button-{}-'.format(i), 'active') for i in range(7)],
+    prevent_initial_call=True
 
 )
 def agp_weekday_buttons(*args):
@@ -280,10 +284,9 @@ def agp_weekday_buttons(*args):
     *[Output('overview_btn_horizon_expand-{}-'.format(i), 'children') for i in range(num_horizon_graphs)],
     *[State('pattern_details_date_{}'.format(i), 'children') for i in range(num_horizon_graphs)],
     [State('overview_horizon_graph_{}'.format(i), 'figure') for i in range(num_horizon_graphs)],
-    # prevent_initial_call=True
+    prevent_initial_call=True
 )
-def expand_button_click(*args):
-    # clicked = [int(i) for i in buttons].index(max([int(i) for i in buttons]))
+def overview_expand_button_click(*args):
     dates = args[num_horizon_graphs:2 * num_horizon_graphs]
     figures = args[2 * num_horizon_graphs:]
     dates = [datetime.strptime(date, '%d/%m/%Y') if len(date) > 0 else '' for date in dates]
@@ -336,6 +339,7 @@ def expand_button_click(*args):
     *[Output('pattern_detail_agp_div_{}'.format(i), 'style') for i in range(num_horizon_graphs)],
     *[Output('btn_agp_date-{}-'.format(i), 'children') for i in range(num_horizon_graphs)],
     *[Output('overview_horizon_graph_{}'.format(i), 'figure') for i in range(num_horizon_graphs)],
+    # prevent_initial_call=True
 )
 def overview_update_dates(date_start, date_end):
     stats, tir, carbs_sum, bolus_sum, basal_sum = get_statistics_days(date_start, date_end)
@@ -371,6 +375,7 @@ def overview_update_dates(date_start, date_end):
     Input({'type': 'overview_quick_date_button', 'index': ALL}, 'n_clicks'),
     Output('overview_date-picker-range', 'start_date'),
     Output('overview_date-picker-range', 'end_date'),
+    prevent_initial_call=True
 )
 def overview_quick_date_buttons(n_clicks):
     triggered_id = ctx.triggered_id
@@ -379,7 +384,8 @@ def overview_quick_date_buttons(n_clicks):
 
 @app.callback(
     Input('overview_open_weekly_stats', 'n_clicks'),
-    Output('overview_modal', 'is_open')
+    Output('overview_modal', 'is_open'),
+    prevent_initial_call=True
 )
 def overview_open_weekly_stats(_):
     return True
@@ -409,6 +415,7 @@ def overview_open_weekly_stats(_):
     Output('overview_agp_graph', 'figure'),
     *[Output('pattern_detail_agp_div_{}'.format(i), 'style') for i in range(num_horizon_graphs)],
     [Output('overview_weekday_button-{}-'.format(i), 'active') for i in range(7)],
+    prevent_initial_call=True
 
 )
 def overview_weekday_buttons(*args):
@@ -583,7 +590,6 @@ def update_insights_hypos(_, time_of_day_filter):
     triggered_id = ctx.triggered_id
 
     if triggered_id == 'insights_hypos_filter_apply_btn':
-        print('##############################################')
         hypos_n_clusters_, hypos_bar_graphs, hypos_graph_all_curves, hypos_graphs_insights, hypos_start_bgs, hypos_end_bgs, hypos_carb_avg_before, hypos_carb_avg_after, hypos_bolus_avg_before, \
         hypos_bolus_avg_after = get_insight_data_hypos(filter_time_of_day=time_of_day_filter)
 
