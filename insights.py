@@ -54,9 +54,7 @@ def get_insight_clusters(dataset, max_d=200):
     distance_matrix = get_dtw_distance(dataset)
     Z = hierarchical_clustering(distance_matrix)
     clusters = get_clusters_from_z(Z, max_d)
-    print(clusters)
     clusters = sort_clusters(clusters)
-    print(clusters)
     return clusters
 
 
