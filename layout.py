@@ -26,6 +26,7 @@ warnings.simplefilter(action="ignore", category=SettingWithCopyWarning)
 # Connect to main app.py file
 FONT_AWESOME = "https://use.fontawesome.com/releases/v5.7.2/css/all.css"
 app = DashProxy(prevent_initial_callbacks=True, transforms=[MultiplexerTransform()], suppress_callback_exceptions=True, external_stylesheets=[dbc.themes.BOOTSTRAP, FONT_AWESOME])
+app.title = 'Marjorie'
 
 ################################################################################
 # GENERAL LAYOUT
