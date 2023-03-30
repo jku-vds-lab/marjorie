@@ -172,7 +172,7 @@ def draw_horizon_graph(sgv_today, carbs_today, insulin_today, x_range):
                       margin=dict(t=0, b=20, l=0, r=0),
                       plot_bgcolor=colors['background'],
                       yaxis=dict(
-                          range=[0, 0.48 + 0.2],
+                          range=[0, 1],
                           tickfont_size=8,
                           visible=False
                       ),
