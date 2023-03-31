@@ -167,7 +167,7 @@ def draw_daily_plot(day, zoom_data=None, cutoff_value=1.5, bar_width_factor=15):
                                margin=dict(t=25, b=10, l=0, r=0),
                                plot_bgcolor='rgba(248,249,250,1)',
                                yaxis=dict(
-                                   range=[0, 400],
+                                   range=[0, 420],
                                    tickfont_size=8,
                                ),
                                yaxis2=dict(
