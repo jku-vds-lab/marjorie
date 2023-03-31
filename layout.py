@@ -90,7 +90,10 @@ layout_daily = html.Div(
                     dbc.CardBody(
                         dcc.Graph(
                             figure=draw_daily_plot(date_max.date()),
-                            id='daily_graph'
+                            id='daily_graph',
+                            config={
+                                'displayModeBar': False
+                            }
                         ),
                     )
                 ],
@@ -469,7 +472,10 @@ layout_agp = html.Div(
                                                             # html.Div(children='Weekdays', style={'font-family': font, 'font-size': 'small', 'padding': '5% 0% 5% 0%'}),
                                                             dcc.Graph(
                                                                 id='agp_week_graph',
-                                                                figure=draw_seasonal_graph('week', start_date, end_date)
+                                                                figure=draw_seasonal_graph('week', start_date, end_date),
+                                                                config={
+                                                                    'displayModeBar': False
+                                                                }
                                                             ),
                                                             # weekday_checklist
                                                         ])
@@ -901,7 +907,10 @@ layout_overview = html.Div(
                                                             # html.Div(children='Weekdays', style={'font-family': font, 'font-size': 'small', 'padding': '5% 0% 5% 0%'}),
                                                             dcc.Graph(
                                                                 id='overview_week_graph',
-                                                                figure=draw_seasonal_graph('week', start_date, end_date)
+                                                                figure=draw_seasonal_graph('week', start_date, end_date),
+                                                                config={
+                                                                    'displayModeBar': False
+                                                                }
                                                             ),
                                                             # weekday_checklist
                                                         ])
@@ -946,7 +955,10 @@ layout_overview = html.Div(
                             ################################################################################
                             html.Div(
                                 children=dcc.Graph(
-                                    figure=agp_xaxis()
+                                    figure=agp_xaxis(),
+                                    config={
+                                        'displayModeBar': False
+                                    }
                                 ),
                                 style={'position': 'fixed', 'bottom': '0', 'z-index': '9000', 'padding': '0rem 0rem 0rem 60px'}
                             ),
