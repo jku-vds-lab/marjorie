@@ -172,18 +172,22 @@ def draw_daily_plot(day, zoom_data=None, cutoff_value=1.5, bar_width_factor=15):
                                yaxis=dict(
                                    range=[0, 420],
                                    tickfont_size=8,
+                                   fixedrange=True
                                ),
                                yaxis2=dict(
                                    range=[0, max(logs_carbs.carbs)],
                                    tickfont_size=8,
+                                   fixedrange=True
                                ),
                                yaxis3=dict(
                                    range=[0, max(logs_insulin.bolus)],
                                    tickfont_size=8,
+                                   fixedrange=True
                                ),
                                yaxis4=dict(
                                    range=[0, 1.5],
                                    tickfont_size=8,
+                                   fixedrange=True
                                ),
                                font=dict(
                                    family=font,
