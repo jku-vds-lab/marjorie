@@ -424,6 +424,7 @@ def draw_barcode_plot(fig, logs, log_type, row, spacing=0.25):
             go.Scattergl(
                 x=x,
                 y=[i] * len(x),
+                hoverinfo='skip',
                 mode='markers',
                 marker=dict(size=6, symbol='square-dot', opacity=alphas, color=colors[log_type]),
             ),

@@ -109,6 +109,8 @@ def draw_hierarchical_pattern_overview(dataset, dataset_array, dataset_carbs, da
             go.Scatter(
                 x=x,
                 y=data_sgv.sgv,
+                hovertext=[data_sgv.timestamp.iloc[0].date() for i in range(len(data_sgv))],
+                hoverinfo='text',
                 mode='lines',
                 connectgaps=False,
                 showlegend=False,
@@ -128,6 +130,8 @@ def draw_hierarchical_pattern_overview(dataset, dataset_array, dataset_carbs, da
                         x=[data_carbs.x.iloc[i]],
                         y=[0],
                         mode='markers',
+                        hovertext=[data_carbs.carbs.tolist()[i]],
+                        hoverinfo='text',
                         marker=dict(
                             color='rgba(255,213,114, {})'.format(data_carbs.alphas.iloc[i]),
                             size=10
@@ -146,6 +150,8 @@ def draw_hierarchical_pattern_overview(dataset, dataset_array, dataset_carbs, da
                     go.Scatter(
                         x=[data_bolus.x.iloc[i]],
                         y=[0],
+                        hovertext=[data_bolus.bolus.tolist()[i]],
+                        hoverinfo='text',
                         mode='markers',
                         marker=dict(
                             color='rgba(90,209,245, {})'.format(data_bolus.alphas.iloc[i]),
@@ -235,8 +241,10 @@ def draw_hierarchical_pattern_overview(dataset, dataset_array, dataset_carbs, da
             z=[z],
             x=tickvals,
             y=[''],
+            hovertext=[z],
+            hoverinfo='text',
             # text=[text],
-            texttemplate="%{text}",
+            # texttemplate="%{text}",
             colorscale=colormap_heatmap,
             zmin=1,
             zmax=400,
@@ -853,6 +861,7 @@ def get_curve_overview_plot(dataset, dataset_unfiltered, insights_type='meals'):
             go.Scatter(
                 x=x,
                 y=data,
+                hoverinfo='skip',
                 mode='lines',
                 line=dict(color='lightgray')
             )
@@ -863,6 +872,7 @@ def get_curve_overview_plot(dataset, dataset_unfiltered, insights_type='meals'):
             go.Scatter(
                 x=x,
                 y=data,
+                hoverinfo='skip',
                 mode='lines',
                 line=dict(color='rgba(92, 99, 106, 0.3)')
             )

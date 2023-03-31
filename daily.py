@@ -121,6 +121,7 @@ def draw_daily_plot(day, zoom_data=None, cutoff_value=1.5, bar_width_factor=15):
             x=x,
             y=y,
             mode='lines',
+            hoverinfo='skip',
             line=dict(color='rgba(0, 159, 219, 1)', dash='dash'),
             # connectgaps=False,
             xaxis='x2',
@@ -136,6 +137,7 @@ def draw_daily_plot(day, zoom_data=None, cutoff_value=1.5, bar_width_factor=15):
                 x=x,
                 y=y,
                 mode='lines',
+                hoverinfo='skip',
                 line=dict(color='rgba(0, 159, 219, 1)'),
                 fill='toself',
                 fillcolor='rgba(0, 159, 219, 0.5)',
@@ -149,6 +151,7 @@ def draw_daily_plot(day, zoom_data=None, cutoff_value=1.5, bar_width_factor=15):
             go.Scattergl(
                 x=x,
                 y=y,
+                hoverinfo='skip',
                 mode='lines',
                 line=dict(color='rgba(0, 159, 219, 1)'),
                 fill='toself',
