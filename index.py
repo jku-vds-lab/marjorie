@@ -101,6 +101,24 @@ def daily_date_button_forward(n_clicks, current_date):
     return current_date + timedelta(days=1)
 
 
+@app.callback(
+    Output('daily_graph', 'figure'),
+    Input('daily_graph', 'relayoutData'),
+    State('date_picker_daily', 'date'),
+)
+def daily_semantic_zoom(zoom_data, default_date):
+    if zoom_data:
+        start = convert_datestring(zoom_data['xaxis.range[0]'])
+        end = convert_datestring(zoom_data['xaxis.range[1]'])
+        window_width = (end - start) / timedelta(hours=1)
+    else:
+        start = datetime.combine(datetime.strptime(default_date, '%Y-%m-%d').date(), datetime.min.time())
+        end = start + timedelta(hours=24)
+        window_width = 24
+
+    return draw_daily_plot(start.date(), cutoff_value=window_width / 24 * 1.5, zoom_data=[start, end], bar_width_factor=window_width / 24 * 15 + 2)
+
+
 ################################################################################
 # CALLBACKS AGP
 ################################################################################
@@ -608,4 +626,4 @@ def update_insights_hypos(_, time_of_day_filter):
 
 
 if __name__ == '__main__':
-    app.run_server(host='0.0.0.0', port=8050, debug=True)
+    app.run_server(host='0.0.0.0', port=8050, debug=False)
