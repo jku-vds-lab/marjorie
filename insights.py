@@ -797,6 +797,7 @@ def get_insight_data_hypos(filter_time_of_day=None):
 
     for i in range(n_clusters_):
         hypo_starts_cluster = hypo_starts.iloc[clusters == i + 1].tolist()
+        hypo_starts_cluster = [item + timedelta(hours=time_before_hypo) for item in hypo_starts_cluster]
         dataset_cluster = [j for (j, v) in zip(logs_indices['sgv'], clusters == i + 1) if v]
         dataset_cluster_carbs = [j for (j, v) in zip(logs_indices['carbs'], clusters == i + 1) if v]
         dataset_cluster_bolus = [j for (j, v) in zip(logs_indices['insulin'], clusters == i + 1) if v]
