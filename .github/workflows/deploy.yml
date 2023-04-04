@@ -1,5 +1,8 @@
 name: Build & Deploy Docker Image
 
+env:
+  PROJECT_NAME: marjorie
+
 on:
   push:
     branches: [ "main" ]
@@ -30,7 +33,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v4
         with:
-          images: ghcr.io/jku-vds-lab/marjorie
+          images: ghcr.io/jku-vds-lab/${{PROJECT_NAME}}
       - name: Print metadata
         run: |
           echo ${{ steps.meta.outputs.tags }}
@@ -53,13 +56,12 @@ jobs:
           AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          awsFamily: marjorie
         run: |
-          isTaskRunning=$(aws --output text ecs list-tasks --cluster JKU_ASG_Cluster --family ${awsFamily})
+          isTaskRunning=$(aws --output text ecs list-tasks --cluster JKU_ASG_Cluster --family ${PROJECT_NAME})
           echo "isTaskRunning? --${isTaskRunning}--"
           if [ ! -z "$isTaskRunning" ]; then
             taskId=$(echo "${isTaskRunning}" | cut -f2)
             echo "taskId--${taskId}--"
             aws --output text ecs stop-task --cluster JKU_ASG_Cluster --task ${taskId}
           fi
-          aws --output text ecs run-task --cluster JKU_ASG_Cluster --task-definition ${awsFamily} --started-by GithubAction
+          aws --output text ecs run-task --cluster JKU_ASG_Cluster --task-definition ${PROJECT_NAME} --started-by GithubAction
