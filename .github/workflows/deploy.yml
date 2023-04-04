@@ -1,0 +1,13 @@
+name: Node Build+Deploy
+
+on: push
+
+jobs:
+  restart-aws:
+    name: Restart AWS ECS Task
+    runs-on: ubuntu-latest
+    steps:
+      - 
+        name: AWS Configure
+        run: |
+          aws configure
