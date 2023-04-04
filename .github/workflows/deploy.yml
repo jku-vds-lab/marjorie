@@ -31,7 +31,7 @@ jobs:
           images: ghcr.io/jku-vds-lab/marjorie
       - name: Print metadata
         run: |
-          echo ${steps.meta.outputs.tags}
+          echo ${{ steps.meta.outputs.tags }}
       - name: Build and push Docker image
         uses: docker/build-push-action@v3
         with:
