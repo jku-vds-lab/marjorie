@@ -1,11 +1,48 @@
-name: Node Build+Deploy
+name: Build & Deploy Docker Image
 
 on: push
 
+
 jobs:
+  build:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set Debug Mode to False
+        uses: jacobtomlinson/gha-find-replace@v3
+        with:
+          find: "debug=True"
+          replace: "debug=False"
+          regex: false
+      - name: Git config
+        run: |
+          git config --global url."https://github.com/".insteadOf ssh://git@github.com/
+          git config --add --global url."https://github.com/".insteadOf git@github.com:
+      - name: Build the Docker image
+        run: docker build --tag marjorie .
+      - name: Log in to the Container registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ghcr.io/jku-vds-lab/marjorie
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
   restart-aws:
     name: Restart AWS ECS Task
     runs-on: ubuntu-latest
+    needs: [build]
     steps:
       - 
         name: AWS Login
