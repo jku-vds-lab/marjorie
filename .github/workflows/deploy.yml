@@ -1,6 +1,8 @@
 name: Build & Deploy Docker Image
 
-on: push
+on:
+  push:
+    branches: [ "main" ]
 
 
 jobs:
