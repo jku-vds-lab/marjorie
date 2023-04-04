@@ -33,7 +33,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v4
         with:
-          images: ghcr.io/jku-vds-lab/${{PROJECT_NAME}}
+          images: ghcr.io/jku-vds-lab/$PROJECT_NAME
       - name: Print metadata
         run: |
           echo ${{ steps.meta.outputs.tags }}
