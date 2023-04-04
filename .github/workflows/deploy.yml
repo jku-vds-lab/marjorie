@@ -13,6 +13,13 @@ jobs:
           AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          awsFamily: marjorie
         run: |
-          echo "$AWS_DEFAULT_REGION"
-          aws ecr get-login --no-include-email
+          isTaskRunning=$(aws --output text ecs list-tasks --cluster JKU_ASG_Cluster --family ${awsFamily})
+          echo "isTaskRunning? --${isTaskRunning}--"
+          if [ ! -z "$isTaskRunning" ]; then
+            taskId=$(echo "${isTaskRunning}" | cut -f2)
+            echo "taskId--${taskId}--"
+            aws --output text ecs stop-task --cluster JKU_ASG_Cluster --task ${taskId}
+          fi
+          aws --output text ecs run-task --cluster JKU_ASG_Cluster --task-definition ${awsFamily} --started-by CircleCIAutoUpdate
