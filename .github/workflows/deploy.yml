@@ -3,8 +3,9 @@ name: Build & Deploy Docker Image
 env:
   PROJECT_NAME: marjorie
 
-on: push
-
+on:
+  push:
+    branches: [ "main" ]
 
 jobs:
   build:
