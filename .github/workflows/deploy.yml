@@ -22,4 +22,4 @@ jobs:
             echo "taskId--${taskId}--"
             aws --output text ecs stop-task --cluster JKU_ASG_Cluster --task ${taskId}
           fi
-          aws --output text ecs run-task --cluster JKU_ASG_Cluster --task-definition ${awsFamily} --started-by CircleCIAutoUpdate
+          aws --output text ecs run-task --cluster JKU_ASG_Cluster --task-definition ${awsFamily} --started-by GithubAction
