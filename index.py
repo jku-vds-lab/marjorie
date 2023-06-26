@@ -619,7 +619,7 @@ def update_insights_hypos(_, time_of_day_filter):
         logs_hypos = filter_function_time_of_day(logs_hypos, time_of_day_filter)
 
         dataset_clusters, _ = get_dataset(logs_hypos)
-        figure = get_curve_overview_plot(dataset_clusters, dataset_unfiltered)
+        figure = get_curve_overview_plot(dataset_clusters, dataset_unfiltered, insights_type='hypos')
 
         no_update = [dash.no_update] * num_insight_patterns
         return figure, False, *no_update, *no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update
