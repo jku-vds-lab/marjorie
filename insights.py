@@ -109,7 +109,9 @@ def draw_hierarchical_pattern_overview(dataset, dataset_array, dataset_carbs, da
             go.Scatter(
                 x=x,
                 y=data_sgv.sgv,
-                hovertext=[data_sgv.timestamp.iloc[0].date() for i in range(len(data_sgv))],
+                # hovertext=[data_sgv.timestamp.iloc[0].date() for i in range(len(data_sgv))],
+                hovertext=data_sgv.timestamp.iloc[0].strftime('%a') + ', ' + data_sgv.timestamp.iloc[0].strftime('%y-%m-%d') + ', ' + data_sgv.timestamp.iloc[0].strftime('%H:%M') + '-' + data_sgv.timestamp.iloc[
+                    -1].strftime('%H:%M'),
                 hoverinfo='text',
                 mode='lines',
                 connectgaps=False,
