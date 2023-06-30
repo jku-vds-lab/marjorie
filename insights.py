@@ -130,7 +130,7 @@ def draw_hierarchical_pattern_overview(dataset, dataset_array, dataset_carbs, da
                         x=[data_carbs.x.iloc[i]],
                         y=[0],
                         mode='markers',
-                        hovertext=[data_carbs.carbs.tolist()[i]],
+                        hovertext=get_hover_data(data_carbs, 'carbs', 'g', 0),
                         hoverinfo='text',
                         marker=dict(
                             color='rgba(255,213,114, {})'.format(data_carbs.alphas.iloc[i]),
@@ -150,7 +150,7 @@ def draw_hierarchical_pattern_overview(dataset, dataset_array, dataset_carbs, da
                     go.Scatter(
                         x=[data_bolus.x.iloc[i]],
                         y=[0],
-                        hovertext=[data_bolus.bolus.tolist()[i]],
+                        hovertext=get_hover_data(data_bolus, 'bolus', 'U', 1),
                         hoverinfo='text',
                         mode='markers',
                         marker=dict(
@@ -538,6 +538,15 @@ def draw_pattern_detail_plot(day, sgv_today, carbs_today, insulin_today, x_range
                                )
 
     return fig_timeline
+
+
+def get_hover_data(agg_data, log_type, unit, round_):
+    # hover data
+    dates = agg_data.timestamp
+    amount = agg_data[log_type]
+
+    name = dates.dt.strftime('%a') + ', ' + dates.dt.strftime('%y-%m-%d') + ', ' + dates.dt.strftime('%H:%M') + ': ' + '<b>' + amount.round(round_).astype(str) + ' {}</b>'.format(unit)
+    return name
 
 
 def get_logs_meals(start_date, end_date, time_before, time_after):
